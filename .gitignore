@@ -1,0 +1,22 @@
+node_modules/
+.venv/
+dist/
+dist-electron/
+release/
+public/cesium/
+__pycache__/
+*.pyc
+.DS_Store
+.test-artifacts/
+
+.playwright-cli/
+output/
+resources/engines/nginx/
+resources/engines/python/
+
+# User-owned GIS data and local configuration
+data/
+.env
+.env.*
+!.env.example
+*.log

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <rect x="32" y="32" width="960" height="960" rx="224" fill="#ffffff"/>
+ <!-- A large quiet globe sits behind the service, rather than above it. -->
+ <g fill="none" stroke="#225bce" stroke-width="20" opacity=".22">
+  <circle cx="512" cy="476" r="294"/>
+  <ellipse cx="512" cy="476" rx="130" ry="294"/>
+  <ellipse cx="512" cy="476" rx="294" ry="108"/>
+  <path d="M512 182v588"/>
+ </g>
+ <!-- Solid server bays are the foreground and the dominant visual mass. -->
+ <rect x="290" y="346" width="444" height="140" rx="32" fill="#225bce"/>
+ <rect x="290" y="508" width="444" height="140" rx="32" fill="#225bce"/>
+ <g fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round">
+  <path d="M340 416h146M340 578h146"/>
+ </g>
+ <g fill="#7ce0cd"><circle cx="632" cy="416" r="16"/><circle cx="682" cy="416" r="16"/><circle cx="632" cy="578" r="16"/><circle cx="682" cy="578" r="16"/></g>
+ <!-- The small distribution tree supports the service without competing with it. -->
+ <path d="M512 648v76M380 754v-30h264v30" fill="none" stroke="#225bce" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+ <g fill="#28bda6"><rect x="357" y="742" width="46" height="46" rx="11"/><rect x="489" y="742" width="46" height="46" rx="11"/><rect x="621" y="742" width="46" height="46" rx="11"/></g>
+</svg>

@@ -1,0 +1,82 @@
+{
+  "name": "gis-data-press",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "GIS 数据加工与静态目录发布桌面工具",
+  "author": "GIS Data Press",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "vue-tsc --noEmit && vite build && node scripts/build.mjs",
+    "start": "electron .",
+    "test": "tsx --test tests/*.test.ts && .venv/bin/python -m unittest discover -s tests -p 'test_*.py'",
+    "package": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.0",
+    "cesium": "^1.139.0",
+    "lucide-vue-next": "^0.468.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "vite": "^7.0.0",
+    "typescript": "^5.9.0",
+    "vue-tsc": "^3.0.0",
+    "electron": "^41.0.0",
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.27.0",
+    "tsx": "^4.20.0",
+    "@types/node": "^24.0.0",
+    "playwright": "^1.55.0"
+  },
+  "build": {
+    "appId": "com.gisdatapress.desktop",
+    "productName": "GIS Data Press",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "python",
+        "to": "python"
+      },
+      {
+        "from": "resources/engines",
+        "to": "engines"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "resources/icons/app.icns"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resources/icons/app.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "resources/icons/icon-512.png"
+    },
+    "beforePack": "scripts/check-package.cjs",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  }
+}

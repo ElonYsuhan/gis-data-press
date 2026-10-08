@@ -1,6 +1,6 @@
-# GIS Data Press 0.1
+# GeoPress 0.1
 
-Electron + TypeScript + Python 桌面 GIS 加工与静态目录发布工具。
+GeoPress 是 Electron + TypeScript + Python 桌面 GIS 加工与静态目录发布工具。应用更名后继续使用原有用户数据目录，沿用已保存的设置、资源索引和发布后台状态。
 
 数据始终位于用户指定的目录。软件仅保存映射配置、最多 200 项资源索引样本、任务参数和日志，不复制原始数据，不建立内部数据仓库。
 
@@ -11,6 +11,7 @@ Electron + TypeScript + Python 桌面 GIS 加工与静态目录发布工具。
 - 目录变化监听 + 30 秒周期检查；没有有效资源或入口无效时将映射更新为 HTTP 503。文件丢失时可能先返回 404，监测和重载不是瞬时操作。
 - TIFF / VRT 元信息读取；单波段、RGB / RGBA TIFF 转 XYZ PNG，支持窗口读取和可选百分位拉伸。
 - DEM → Quantized Mesh：支持本地 CTB Mesh 分支，或已安装的 Docker CTB 镜像；需要 GDAL 的 gdalwarp，且由用户确认椭球高。
+- 切片层级支持手动填写，或按源数据水平分辨率换算（米、厘米、千米）。影像采用 256 像素 XYZ 瓦片并按参考纬度修正；地形按 CTB 采样网格估算。自动模式向上取整层级，最多 22 级；更高层级不会增加源数据细节。
 - OSGB → 3D Tiles：接入 fanvanzh/3dtiles 命令行参数；需配置兼容本机的外部引擎。选择包含 Data 与 metadata.xml 的整个目录；无 metadata.xml 时填写 WGS84 定位原点。
 - 顺序任务队列、实时日志、取消、输出目录防覆盖、加工完成后登记发布。
 - Cesium 本地服务预览、图片预览、接入代码复制。
@@ -57,7 +58,7 @@ python3 scripts/bundle-nginx.py
 npm run package
 ```
 
-生成 `release/mac-arm64/GIS Data Press.app`。打包的 worker 包含 Python、Rasterio 与 NumPy，不需要另装 Python；影像切片仍需要外部 GDAL。地形和 OSGB 引擎按设置使用外部工具。构建默认不执行 Apple 公证，其他机器的安装分发需后续签名验收。
+生成 `release/mac-arm64/GeoPress.app`。打包的 worker 包含 Python、Rasterio 与 NumPy，不需要另装 Python；影像切片仍需要外部 GDAL。地形和 OSGB 引擎按设置使用外部工具。构建默认不执行 Apple 公证，其他机器的安装分发需后续签名验收。
 
 ## 发布目录
 
@@ -98,11 +99,12 @@ npm run build
 
 ## 源码
 
-- `electron/manager.ts`：配置、索引监测、任务调度、引擎检测。
-- `electron/nginx.ts`：静态映射配置与 Nginx 生命周期。
-- `electron/catalog.ts`：资源索引与有效性检查。
-- `python/worker.py`：数据读取、预处理和转换引擎适配。
-- `src/App.vue` / `src/Preview.vue`：桌面工作流与 Cesium 预览。
+- `server/manager.ts`：配置、索引监测、任务调度、引擎检测。
+- `server/nginx.ts`：静态映射配置与 Nginx 生命周期。
+- `server/catalog.ts`：资源索引与有效性检查。
+- `python/worker.py`：JSON 协议入口；加工实现位于 `python/gis_processing/`。
+- `src/pages/` / `src/features/`：Naive UI 页面、业务组件与 Cesium 预览。
+- 开发规范、模块边界和检查命令见 [维护文档](docs/ARCHITECTURE.md)。
 
 原型已备份至工程同级的 `gis-data-press-backup-20261006-223447`。
 
@@ -143,3 +145,13 @@ Logo 源文件为 `public/logo.svg`，桌面各平台图标在 `resources/icons/
 Byte RGB/RGBA 影像无需拉伸或覆盖坐标系时直接读取原始 TIFF，跳过整份 RGBA 临时文件；其他影像仍按窗口转换并显示预处理进度。支持时优先使用 GDAL 原生 raster tile 的并行工作进程及 PNG 快速无损压缩，旧版本回退 gdal2tiles。压缩速度优化可能增加 PNG 文件大小，像素仍为无损编码。默认影像最大层级 15、地形 14；读取元信息后可使用根据源分辨率计算的层级建议。
 
 修改 python/worker.py 后，先用构建环境 Python 执行 scripts/bundle-worker.py 更新内置 worker，再打包 Electron；仅修改 Python 源码不会更新已有冻结可执行文件。
+
+### TIFF 融合与单文件成果
+
+在“数据处理”中选择多个 TIFF / VRT，选择较精细数据优先或手动覆盖顺序，设置层级和新的成果文件路径。影像生成 `.mbtiles`，地形生成 `.terrain.sqlite`。地形输入必须先确认米制 WGS84 椭球高，可填写已经确认的逐文件高差校正值。
+
+成果旁的 `<文件名>.sources` 保留 COG 母数据、VRT、来源和恢复记录；原始输入保留。再次融合时可把 `master.tif` 和新增 TIFF 作为输入，输出新版本。失败或取消后，用相同输入、参数和成果路径继续任务会利用已完成阶段；变更输入或参数请使用新成果文件名。不要删除 `.sources` 中的处理记录后再尝试恢复。
+
+任务完成后点击“发布”，单文件可直接登记。影像服务仍使用 XYZ URL；地形服务提供 Cesium 标准 `layer.json` 和 `.terrain` 请求。地形 SQLite 容器由 GeoPress 定义，客户端通过服务读取。
+
+目前采用完整新版本加工，局部增量重建与自动垂直高程基准转换尚未实现。详见 [维护文档](docs/ARCHITECTURE.md)。

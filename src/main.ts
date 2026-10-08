@@ -1,4 +1,6 @@
-import { createApp } from 'vue'
+import { createApp, h } from 'vue'
 import App from './App.vue'
+import AppProviders from './app/AppProviders.vue'
 import './style.css'
-createApp(App).mount('#app')
+
+createApp({ render: () => h(AppProviders, null, { default: () => h(App) }) }).mount('#app')

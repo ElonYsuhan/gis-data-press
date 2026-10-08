@@ -1,0 +1,220 @@
+.resource-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.resource-tabs button {
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: #718199;
+}
+.resource-tabs button.chosen,
+.boundary-results button.chosen {
+  border-color: #477bea;
+  background: #f3f7ff;
+  color: #3268e7;
+}
+.resource-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.acquisition-panel,
+.local-resources-panel {
+  padding: 20px;
+  min-width: 0;
+}
+.resource-columns .section-title {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.boundary-search {
+  display: flex;
+  gap: 8px;
+}
+.boundary-search input:not([class]) {
+  min-width: 0;
+}
+.boundary-search button {
+  flex-shrink: 0;
+}
+.boundary-results {
+  margin-top: 14px;
+  min-height: 240px;
+}
+.boundary-results button {
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  gap: 10px;
+  color: #637891;
+}
+.boundary-results strong {
+  font-size: 12px;
+  display: block;
+}
+.boundary-results small {
+  display: block;
+  font-size: 10px;
+  margin-top: 4px;
+  color: #8593a6;
+}
+.boundary-results button > span:last-child {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.boundary-placeholder {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8a98aa;
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+}
+.resource-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 10px;
+  color: #8290a2;
+}
+.resource-pagination button {
+  padding: 6px 10px;
+}
+.resource-destination {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.resource-download-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  gap: 12px;
+}
+.resource-download-footer small {
+  font-size: 10px;
+  color: #8290a2;
+}
+.resource-description {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #7b8ba1;
+  margin: 12px 0 18px;
+}
+.acquisition-panel > label {
+  margin-top: 18px;
+}
+.resource-register {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.resource-register > div {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.resource-register .primary {
+  margin-left: auto;
+}
+.local-resource-list article {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.local-resource-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.local-resource-title strong {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.local-resource-list code {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  color: #8a98aa;
+  margin: 8px 0;
+}
+.local-resource-list small,
+.local-resource-list p {
+  font-size: 10px;
+}
+.local-resource-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.local-resource-actions button {
+  font-size: 10px;
+  padding: 5px 8px;
+}
+.local-resource-list progress {
+  width: 100%;
+  height: 6px;
+  accent-color: #3268e7;
+}
+.resource-workspace button:focus-visible {
+  outline: 2px solid #477bea;
+  outline-offset: 3px;
+}
+.boundary-results {
+  min-height: 180px;
+}
+@media (max-height: 760px) {
+  .resource-workspace .page-heading {
+    margin-bottom: 12px;
+  }
+  .resource-tabs {
+    margin-bottom: 12px;
+  }
+  .resource-tabs button {
+    padding: 8px 16px;
+  }
+  .acquisition-panel,
+  .local-resources-panel {
+    padding: 16px;
+  }
+  .resource-columns .section-title {
+    margin-bottom: 12px;
+  }
+  .boundary-results {
+    margin-top: 10px;
+    min-height: 150px;
+  }
+  .boundary-results button {
+    padding: 7px 10px;
+  }
+  .resource-destination {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+  .resource-download-footer {
+    margin-top: 10px;
+  }
+  .resource-description {
+    font-size: 11px;
+  }
+  .local-resource-list article {
+    padding: 10px 0;
+  }
+}

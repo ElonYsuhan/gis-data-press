@@ -1,2 +1,2 @@
-rasterio>=1.4,<2
 numpy>=2,<3
+rasterio>=1.4,<2

@@ -1,0 +1,414 @@
+/* Application layout only. Naive UI owns borders, focus, disabled and loading styles. */
+.n-config-provider {
+  min-height: 100vh;
+}
+.n-input,
+.n-input-number,
+.n-select {
+  min-width: 0;
+  width: 100%;
+}
+.n-input input,
+.n-input-number input {
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  outline: none;
+  font-size: inherit;
+}
+.n-input input:focus-visible,
+.n-input-number input:focus-visible {
+  outline: none;
+}
+.path-input > .n-input {
+  flex: 1;
+}
+.path-input > .n-button {
+  flex-shrink: 0;
+}
+.n-button__content {
+  gap: 7px;
+}
+.sidebar .n-button {
+  justify-content: flex-start;
+}
+.sidebar .n-button__content {
+  width: 100%;
+  justify-content: flex-start;
+}
+.sidebar .n-button__border,
+.sidebar .n-button__state-border {
+  display: none;
+}
+.sidebar .n-button {
+  --n-text-color: #aab8cb !important;
+}
+.sidebar .n-button.active {
+  --n-text-color: white !important;
+}
+.service-dialog,
+.preview-dialog {
+  background: white;
+  color: #253344;
+  border: 1px solid #dfe6f0;
+  border-radius: 12px;
+  box-shadow: 0 25px 90px #14233750;
+  overflow: auto;
+}
+.kind-picker .n-radio {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.kind-picker .n-radio input {
+  width: auto;
+  height: auto;
+}
+.zoom-mode .n-radio input {
+  width: auto;
+  height: auto;
+}
+.resolution-value .n-select {
+  width: 90px;
+  flex-shrink: 0;
+}
+.processing-form .n-input input,
+.processing-form .n-input-number input {
+  height: auto;
+}
+.service-table.n-table {
+  border: none;
+}
+.sidebar nav .n-button.active {
+  background: #2b5dd3;
+  --n-text-color: white !important;
+  --n-text-color-hover: white !important;
+  --n-text-color-pressed: white !important;
+  --n-text-color-focus: white !important;
+}
+.sidebar .n-button .n-button__border,
+.sidebar .n-button .n-button__state-border {
+  display: none;
+}
+/* Long forms scroll inside their panel; the submit action stays reachable. */
+.processing-form {
+  overflow-y: auto;
+  scroll-padding-bottom: 78px;
+}
+.processing-form > * {
+  flex-shrink: 0;
+}
+.process-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: white;
+  padding-bottom: 4px;
+}
+/* Compact Naive buttons otherwise consume their entire width with default padding. */
+.icon-button.n-button {
+  padding: 0;
+}
+.icon-button .n-button__content,
+.n-button__content > svg {
+  flex-shrink: 0;
+}
+.row-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.service-action.n-button {
+  min-height: 32px;
+  font-weight: 500;
+}
+.service-action .n-button__icon {
+  flex-shrink: 0;
+}
+.service-table th:first-child,
+.service-table td:first-child {
+  width: 34%;
+}
+.service-table th:nth-child(2) {
+  width: 12%;
+}
+.service-table th:nth-child(3) {
+  width: 12%;
+}
+.service-table th:nth-child(4) {
+  width: 8%;
+}
+/* Resource metadata is separate from the disclosure action. */
+.service-resource {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.service-resource-details {
+  flex: 1;
+  min-width: 0;
+}
+.service-title.n-button {
+  display: flex;
+  max-width: 100%;
+  justify-content: flex-start;
+  color: #253750;
+  font-size: 13px;
+  font-weight: 600;
+}
+.service-title .n-button__content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.service-directory {
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 18px;
+}
+.service-action.n-button {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* Processing sections keep related controls together; the side panel stays useful before inspection. */
+.processing-layout {
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 18px;
+}
+.processing-section {
+  padding: 18px 0;
+  border-top: 1px solid #edf0f5;
+}
+.processing-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+.processing-section-heading > span {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+  color: #3268e7;
+  background: #edf3ff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.processing-section-heading h2 {
+  margin: 0;
+  font-size: 13px;
+  color: #253750;
+}
+.processing-section-heading > small {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 11px;
+}
+.processing-section > label,
+.processing-section > div > label {
+  display: block;
+  margin: 14px 0 7px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.processing-section .kind-picker {
+  margin: 0 0 12px;
+}
+.manual-paths {
+  margin-top: 10px;
+}
+.manual-paths summary {
+  cursor: pointer;
+  color: #3268e7;
+  font-size: 12px;
+}
+.manual-paths label {
+  display: block;
+  margin: 10px 0 7px;
+  font-size: 11px;
+}
+.fusion-source {
+  padding: 9px 10px;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+.source-file-details strong,
+.source-file-details small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.source-file-details strong {
+  font-size: 12px;
+  color: #334155;
+}
+.source-file-details small {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #64748b;
+}
+.source-remove.n-button {
+  padding: 0;
+  width: 28px;
+  flex-shrink: 0;
+}
+.processing-summary {
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e7edf5;
+  flex-shrink: 0;
+}
+.processing-summary dl {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 13px 10px;
+  margin: 0 0 18px;
+  font-size: 12px;
+}
+.processing-summary dt {
+  color: #64748b;
+}
+.processing-summary dd {
+  margin: 0;
+  text-align: right;
+  color: #334155;
+  font-weight: 500;
+}
+.summary-output {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #f5f7fb;
+  color: #64748b;
+  font-size: 11px;
+}
+.summary-output svg,
+.master-retention svg {
+  flex-shrink: 0;
+}
+.summary-output span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.master-retention {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #2b8064;
+}
+.inspection-panel {
+  overflow-y: auto;
+}
+.inspection-panel .inspection-empty {
+  flex: 0;
+  min-height: 130px;
+}
+.processing-form > .process-actions {
+  margin-top: auto;
+  box-shadow: 0 -8px 16px white;
+}
+@media (max-width: 1150px) {
+  .processing-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 12px;
+  }
+  .fusion-source {
+    flex-wrap: wrap;
+  }
+  .source-file-details {
+    flex-basis: 100%;
+  }
+}
+@media (max-width: 900px) {
+  .processing-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Dark navigation must define every state instead of inheriting light button colors. */
+.sidebar nav .n-button {
+  --n-text-color-hover: #fff !important;
+  --n-text-color-focus: #fff !important;
+  --n-text-color-pressed: #fff !important;
+  --n-color-hover: #1f334e !important;
+  --n-color-focus: #1f334e !important;
+  --n-color-pressed: #243b58 !important;
+}
+.sidebar nav .n-button.active {
+  --n-color-hover: #2b5dd3 !important;
+  --n-color-focus: #2b5dd3 !important;
+  --n-color-pressed: #244fba !important;
+}
+.sidebar nav .n-button:focus:not(:focus-visible) {
+  outline: none;
+}
+.sidebar nav .n-button:focus-visible {
+  outline: 2px solid #a8c7ff;
+  outline-offset: -3px;
+}
+
+.alert .alert-close.n-button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  color: inherit;
+  --n-text-color: currentColor !important;
+  --n-text-color-hover: currentColor !important;
+  --n-text-color-focus: currentColor !important;
+  --n-text-color-pressed: currentColor !important;
+  --n-color-hover: #00000008 !important;
+  --n-color-focus: #00000008 !important;
+  --n-color-pressed: #00000012 !important;
+}
+.alert .alert-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.service-table .row-actions {
+  flex-wrap: nowrap;
+}
+.service-more.n-button {
+  width: 32px;
+  padding: 0;
+}
+
+.service-table th:first-child,
+.service-table td:first-child {
+  width: auto;
+}
+.service-table th:last-child,
+.service-table td:last-child {
+  width: 104px;
+  padding-right: 20px;
+}
+.service-preview.n-button,
+.service-more.n-button {
+  width: 32px;
+  padding: 0;
+}
+.service-preview .n-button__icon {
+  margin: 0;
+}
+.service-table .row-actions {
+  gap: 6px;
+}

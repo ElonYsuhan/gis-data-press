@@ -1,0 +1,12 @@
+node_modules
+.venv
+dist
+dist-electron
+release
+resources/engines
+resources/icons
+.test-artifacts
+.playwright-cli
+data
+output
+package-lock.json

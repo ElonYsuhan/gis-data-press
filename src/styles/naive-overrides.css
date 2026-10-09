@@ -155,7 +155,7 @@
   max-width: 100%;
   justify-content: flex-start;
   color: #253750;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
 }
 .service-title .n-button__content {
@@ -170,12 +170,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #64748b;
-  font-size: 11px;
+  font-size: 16px;
   line-height: 18px;
 }
 .service-action.n-button {
   padding: 0 8px;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 /* Processing sections keep related controls together; the side panel stays useful before inspection. */
@@ -201,24 +201,24 @@
   border-radius: 7px;
   color: #3268e7;
   background: #edf3ff;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 600;
 }
 .processing-section-heading h2 {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   color: #253750;
 }
 .processing-section-heading > small {
   margin-left: auto;
   color: #64748b;
-  font-size: 11px;
+  font-size: 16px;
 }
 .processing-section > label,
 .processing-section > div > label {
   display: block;
   margin: 14px 0 7px;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
 }
 .processing-section .kind-picker {
@@ -230,12 +230,12 @@
 .manual-paths summary {
   cursor: pointer;
   color: #3268e7;
-  font-size: 12px;
+  font-size: 16px;
 }
 .manual-paths label {
   display: block;
   margin: 10px 0 7px;
-  font-size: 11px;
+  font-size: 16px;
 }
 .fusion-source {
   padding: 9px 10px;
@@ -251,12 +251,12 @@
   white-space: nowrap;
 }
 .source-file-details strong {
-  font-size: 12px;
+  font-size: 16px;
   color: #334155;
 }
 .source-file-details small {
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 16px;
   color: #64748b;
 }
 .source-remove.n-button {
@@ -275,7 +275,7 @@
   grid-template-columns: 80px 1fr;
   gap: 13px 10px;
   margin: 0 0 18px;
-  font-size: 12px;
+  font-size: 16px;
 }
 .processing-summary dt {
   color: #64748b;
@@ -294,7 +294,7 @@
   border-radius: 7px;
   background: #f5f7fb;
   color: #64748b;
-  font-size: 11px;
+  font-size: 16px;
 }
 .summary-output svg,
 .master-retention svg {
@@ -310,7 +310,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 16px;
   color: #2b8064;
 }
 .inspection-panel {
@@ -411,4 +411,379 @@
 }
 .service-table .row-actions {
   gap: 6px;
+}
+
+/* Page content starts directly below the native window title bar. */
+.content {
+  max-width: none;
+  padding: 24px 28px;
+}
+.sidebar-bottom {
+  display: none;
+}
+.statusbar {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  background: #fff;
+  padding: 10px 24px;
+}
+.statusbar-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: #64748b;
+}
+.statusbar-summary > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.statusbar-version {
+  margin-left: auto;
+}
+.statusbar .alert {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+}
+.sidebar nav .n-button {
+  height: 44px;
+}
+.metrics {
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 16px;
+}
+.metric {
+  min-height: 150px;
+  padding: 22px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff, #f8faff);
+  box-shadow: 0 3px 12px #14233704;
+  align-items: center;
+}
+.metric strong {
+  font-size: 34px;
+  margin: 12px 0;
+}
+.metric > svg {
+  width: 44px;
+  height: 44px;
+  padding: 9px;
+  background: #edf3ff;
+  color: #477bea;
+  border-radius: 12px;
+}
+.metric small {
+  display: block;
+  line-height: 1.5;
+}
+.server-metric {
+  background: linear-gradient(145deg, #fff, #edf5ff);
+}
+@media (max-width: 1100px) {
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .server-metric {
+    grid-column: 1 / -1;
+    min-height: 125px;
+  }
+}
+
+.service-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  min-height: 56px;
+  padding: 10px 18px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+}
+.summary-count {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.summary-count strong {
+  color: #253344;
+  font-size: 18px;
+  font-weight: 600;
+}
+.summary-engine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 1px solid var(--line);
+  padding-left: 24px;
+}
+.summary-address {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.service-summary .engine-button {
+  margin-top: 0;
+  margin-left: auto;
+}
+@media (max-width: 1100px) {
+  .service-summary {
+    gap: 10px 16px;
+  }
+  .summary-engine {
+    padding-left: 16px;
+  }
+  .summary-address {
+    display: none;
+  }
+}
+
+/* Compact sidebar identity with a single-line subtitle. */
+.sidebar {
+  padding: 24px 16px;
+}
+.sidebar .brand {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 24px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #ffffff12;
+}
+.sidebar img.brand-mark {
+  width: 36px;
+  height: 36px;
+}
+.sidebar .brand > div {
+  min-width: 0;
+  line-height: 1.5;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+.sidebar .brand small {
+  white-space: nowrap;
+  margin-top: 2px;
+  letter-spacing: 0;
+  font-size: 16px;
+}
+.sidebar .browser-button.n-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #9fb3ce;
+  --n-text-color: #9fb3ce !important;
+  --n-text-color-hover: #fff !important;
+  --n-text-color-focus: #fff !important;
+  --n-text-color-pressed: #fff !important;
+}
+.sidebar .browser-button .n-button__content {
+  justify-content: center;
+}
+.sidebar nav {
+  gap: 6px;
+}
+.sidebar nav .n-button {
+  height: 44px;
+  padding: 0 12px;
+}
+.sidebar nav .n-button.active {
+  box-shadow: none;
+}
+
+.mac-desktop .window-drag-region {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 24px;
+  z-index: 20;
+  -webkit-app-region: drag;
+}
+.mac-desktop .sidebar {
+  padding-top: 48px;
+}
+.mac-desktop button,
+.mac-desktop input,
+.mac-desktop select,
+.mac-desktop a {
+  -webkit-app-region: no-drag;
+}
+
+.workspace-notifications {
+  position: fixed;
+  bottom: 58px;
+  right: 24px;
+  z-index: 100;
+  display: grid;
+  gap: 10px;
+  max-width: min(460px, calc(100vw - 280px));
+  pointer-events: none;
+}
+.workspace-notifications .workspace-toast {
+  pointer-events: auto;
+  margin: 0;
+  padding: 10px 12px;
+  min-height: 48px;
+  gap: 10px;
+  background: #fff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px #14233718;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.workspace-toast > svg {
+  flex-shrink: 0;
+}
+.workspace-toast.success > svg {
+  color: #238e6b;
+}
+.workspace-toast.error > svg {
+  color: #d14343;
+}
+
+.services-workspace .content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.services-workspace .page-heading,
+.services-workspace .service-summary {
+  flex-shrink: 0;
+}
+.service-directory-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+.service-directory-panel .panel-toolbar {
+  flex-shrink: 0;
+}
+.service-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.service-list-scroll .service-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fbfcfe;
+}
+.services-workspace .detail-panel {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow: auto;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+/* Keep actions outside the scrolling fields so they never cover an input. */
+.processing-layout .processing-form {
+  padding: 0;
+  overflow: hidden;
+}
+.processing-fields {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px;
+}
+.processing-form > .process-actions {
+  position: static;
+  margin: 0;
+  padding: 16px 22px;
+  border-top: 1px solid #e5ebf3;
+  box-shadow: none;
+  background: #fff;
+}
+.processing-fields .kind-picker > label {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px 14px 12px;
+}
+.processing-fields .kind-picker strong {
+  font-size: 16px;
+  white-space: nowrap;
+}
+.processing-fields .kind-picker .n-radio {
+  top: 20px;
+  right: 10px;
+}
+.processing-fields .kind-picker svg {
+  flex-shrink: 0;
+}
+.inspection-panel .inspection-empty {
+  min-height: 0;
+  padding: 16px 0;
+  text-align: left;
+}
+.inspection-panel .inspection-empty p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.processing-fields .kind-picker .n-radio > label {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.processing-fields > .processing-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.service-summary .engine-button.n-button {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  box-shadow: none;
+  --n-color: #edf4ff !important;
+  --n-color-hover: #e0ecff !important;
+  --n-color-pressed: #d4e4fc !important;
+  --n-text-color: #3268b7 !important;
+  --n-text-color-hover: #285ca6 !important;
+  --n-text-color-pressed: #285ca6 !important;
+}
+.service-summary .engine-button.is-running {
+  --n-color: #fff1ef !important;
+  --n-color-hover: #ffe5e0 !important;
+  --n-color-pressed: #ffd9d1 !important;
+  --n-text-color: #b94b3d !important;
+  --n-text-color-hover: #a23e32 !important;
+  --n-text-color-pressed: #a23e32 !important;
+}
+.service-summary .engine-button .n-button__border,
+.service-summary .engine-button .n-button__state-border {
+  display: none;
+}
+.service-summary .engine-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.service-summary .engine-button.n-button {
+  background: #e0ecff !important;
+}
+.service-summary .engine-button.n-button:hover {
+  background: #cbdfff !important;
+}
+.service-summary .engine-button.is-running.n-button {
+  background: #ffe3dd !important;
+}
+.service-summary .engine-button.is-running.n-button:hover {
+  background: #ffd0c5 !important;
 }

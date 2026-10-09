@@ -57,6 +57,8 @@ export class Manager {
   >()
   private watchers: FSWatcher[] = []
   private dirtyTimer?: ReturnType<typeof setTimeout>
+  private snapshotLogs: string[] = []
+  private readingLogs = false
   private monitor?: ReturnType<typeof setInterval>
   private stopping = false
   private dockerPath = ''
@@ -584,7 +586,24 @@ export class Manager {
     }
     await this.locked(() => this.persist())
   }
+  health() {
+    return {
+      activeJobs: this.jobs.some((job) => ['running', 'queued'].includes(job.status)),
+      activeDownloads: this.downloads.hasActiveDownloads,
+    }
+  }
   async snapshot(): Promise<Snapshot> {
+    // Status must remain available even when optional filesystem log reads stall.
+    if (!this.readingLogs) {
+      this.readingLogs = true
+      void tail(path.join(this.nginx.directory, 'logs', 'access.log'))
+        .then((logs) => {
+          this.snapshotLogs = logs
+        })
+        .finally(() => {
+          this.readingLogs = false
+        })
+    }
     const addresses = [`http://127.0.0.1:${this.settings.port}`]
     if (this.settings.host === '0.0.0.0') {
       for (const list of Object.values(networkInterfaces())) {
@@ -601,7 +620,7 @@ export class Manager {
       settings: this.settings,
       engines: this.engines,
       server: { running: this.nginx.running, error: this.nginx.error, addresses },
-      logs: await tail(path.join(this.nginx.directory, 'logs', 'access.log')),
+      logs: this.snapshotLogs,
     }
   }
   async close(options: { keepPublishing?: boolean } = {}): Promise<void> {

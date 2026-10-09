@@ -40,6 +40,9 @@ if (!app.requestSingleInstanceLock()) {
         minWidth: 1080,
         minHeight: 720,
         title: 'GeoPress',
+        ...(process.platform === 'darwin'
+          ? { titleBarStyle: 'hidden' as const, trafficLightPosition: { x: 18, y: 16 } }
+          : {}),
         icon: path.join(project, 'dist', 'app-icon.png'),
         backgroundColor: '#f5f7fa',
         webPreferences: {

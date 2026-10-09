@@ -31,11 +31,17 @@ const app = await electron.launch({
 try {
   const page = await app.firstWindow()
   await page.getByRole('button', { name: '登记资源目录', exact: true }).first().waitFor()
+  assert.equal(await page.locator('.topbar').count(), 0)
+  assert.equal(
+    await page.locator('html').evaluate((element) => getComputedStyle(element).fontSize),
+    '16px',
+  )
+  assert.ok(await page.locator('.statusbar').isVisible())
   await page.evaluate(
     async ({ fixture, port }) => {
       const snapshot = await window.gis.snapshot()
       await window.gis.saveSettings({ ...snapshot.settings, port })
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 15; i++) {
         await window.gis.savePublication({
           name: '清晰操作 ' + (i + 1),
           directory: fixture,
@@ -54,6 +60,11 @@ try {
       ({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 940),
       width,
     )
+    const scroll = await page
+      .locator('.service-list-scroll')
+      .evaluate((element) => ({ height: element.clientHeight, total: element.scrollHeight }))
+    assert.ok(scroll.total > scroll.height)
+    assert.equal(await page.locator('.guide-grid').count(), 0)
     const metrics = await page
       .locator('.row-actions')
       .first()

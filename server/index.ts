@@ -49,14 +49,16 @@ async function main() {
   manager = new Manager(dataDirectory, project, resources)
   await manager.initialize()
   const token = randomBytes(32).toString('hex')
+  let mutations = 0
   const methods: Record<string, (...args: any[]) => unknown> = {
-    ping: () => ({ pid: process.pid, protocol: 4 }),
+    ping: () => ({ pid: process.pid, protocol: 5 }),
     listResources: () => manager!.listResources(),
     searchBoundaries: (...a: any[]) => manager!.searchBoundaries(a[0]),
     downloadResource: (...a: any[]) => manager!.downloadResource(a[0]),
     registerResource: (...a: any[]) => manager!.registerResource(a[0], a[1]),
     cancelDownload: (...a: any[]) => manager!.cancelDownload(a[0]),
     forgetResource: (...a: any[]) => manager!.forgetResource(a[0]),
+    health: () => ({ ...manager!.health(), mutations }),
     snapshot: () => manager!.snapshot(),
     inspect: (p) => manager!.inspect(p),
     savePublication: (p) => manager!.savePublication(p),
@@ -99,7 +101,20 @@ async function main() {
       if (!Array.isArray(args)) {
         throw new Error('参数无效')
       }
-      const result = await methods[name](...args)
+      const mutable = !['ping', 'health', 'snapshot', 'listResources', 'searchBoundaries'].includes(
+        name,
+      )
+      if (mutable) {
+        mutations++
+      }
+      let result: unknown
+      try {
+        result = await methods[name](...args)
+      } finally {
+        if (mutable) {
+          mutations--
+        }
+      }
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({ result: result ?? null }))
     } catch (error) {

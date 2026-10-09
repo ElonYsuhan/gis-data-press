@@ -13,9 +13,7 @@ import {
   Copy,
   Trash2,
   Globe2,
-  Activity,
   Pause,
-  CheckCircle2,
 } from 'lucide-vue-next'
 import { useWorkspaceContext } from '../app/useWorkspace'
 import { kindLabels, type Publication } from '../../shared/contracts'
@@ -86,58 +84,54 @@ function selectServiceAction(key: string, publication: Publication) {
       登记资源目录
     </NButton>
   </div>
-  <div class="metrics">
-    <div class="metric">
-      <div>
-        <span>已登记目录</span>
-        <strong>{{ publications.length.toString().padStart(2, '0') }}</strong>
-        <small>影像、地形、模型与图片</small>
-      </div>
-      <FolderOpen :size="24" />
-    </div>
-    <div class="metric">
-      <div>
-        <span>有效映射</span>
-        <strong>{{ available.toString().padStart(2, '0') }}</strong>
-        <small>目录存在且资源检查通过</small>
-      </div>
-      <CheckCircle2 :size="24" />
-    </div>
-    <div class="metric server-metric">
-      <div>
-        <span>发布引擎</span>
-        <strong class="engine-name">
-          Nginx
-          <i :class="{ online: snapshot?.server.running }">
-            {{ snapshot?.server.running ? '运行中' : '已停止' }}
-          </i>
-        </strong>
-        <small>
-          {{ base }} · {{ snapshot?.settings.host === '0.0.0.0' ? '内网可访问' : '仅本机访问' }}
-        </small>
-      </div>
-      <NButton
-        class="engine-button"
-        :disabled="busy"
-        attr-type="button"
-        @click="
-          action(
-            () => api.server(snapshot?.server.running ? 'stop' : 'start'),
-            snapshot?.server.running ? '发布服务已停止' : '发布服务已启动',
-          )
-        "
-      >
-        <Square
-          v-if="snapshot?.server.running"
-          :size="14"
-        />
-        <Play
-          v-else
-          :size="14"
-        />
-        {{ snapshot?.server.running ? '停止' : '启动' }}
-      </NButton>
-    </div>
+  <div
+    class="service-summary"
+    aria-label="发布概览"
+  >
+    <span class="summary-count">
+      已登记
+      <strong>{{ publications.length }}</strong>
+    </span>
+    <span class="summary-count">
+      有效
+      <strong>{{ available }}</strong>
+    </span>
+    <span class="summary-engine">
+      <span
+        class="dot"
+        :class="{ online: snapshot?.server.running }"
+      ></span>
+      Nginx · {{ snapshot?.server.running ? '运行中' : '已停止' }}
+    </span>
+    <span
+      class="summary-address"
+      :title="base"
+    >
+      {{ base }}
+    </span>
+    <NButton
+      class="engine-button"
+      :class="{ 'is-running': snapshot?.server.running }"
+      :bordered="false"
+      :disabled="busy"
+      attr-type="button"
+      @click="
+        action(
+          () => api.server(snapshot?.server.running ? 'stop' : 'start'),
+          snapshot?.server.running ? '发布服务已停止' : '发布服务已启动',
+        )
+      "
+    >
+      <Square
+        v-if="snapshot?.server.running"
+        :size="14"
+      />
+      <Play
+        v-else
+        :size="14"
+      />
+      {{ snapshot?.server.running ? '停止' : '启动' }}
+    </NButton>
   </div>
   <div
     v-if="snapshot?.server.error"
@@ -146,7 +140,7 @@ function selectServiceAction(key: string, publication: Publication) {
   >
     {{ snapshot.server.error }}
   </div>
-  <section class="panel">
+  <section class="panel service-directory-panel">
     <div class="panel-toolbar">
       <div class="section-title">
         目录映射
@@ -172,144 +166,141 @@ function selectServiceAction(key: string, publication: Publication) {
         </NButton>
       </div>
     </div>
-    <NTable
-      v-if="filtered.length"
-      class="service-table"
-    >
-      <thead>
-        <tr>
-          <th>服务 / 资源目录</th>
-          <th>类型</th>
-          <th>状态</th>
-          <th>资源数</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="p in filtered"
-          :key="p.id"
-          :class="{ selected: selected === p.id }"
-        >
-          <td>
-            <div class="service-resource">
-              <span
-                class="resource-icon"
-                :class="p.kind"
-                aria-hidden="true"
-              >
-                <component
-                  :is="icons[p.kind]"
-                  :size="20"
-                />
-              </span>
-              <div class="service-resource-details">
-                <NButton
-                  class="service-title"
-                  text
-                  :aria-label="'查看 ' + p.name + ' 的发布详情'"
-                  :aria-expanded="selected === p.id"
-                  @click="selected = selected === p.id ? '' : p.id"
+    <div class="service-list-scroll">
+      <NTable
+        v-if="filtered.length"
+        class="service-table"
+      >
+        <thead>
+          <tr>
+            <th>服务 / 资源目录</th>
+            <th>类型</th>
+            <th>状态</th>
+            <th>资源数</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="p in filtered"
+            :key="p.id"
+            :class="{ selected: selected === p.id }"
+          >
+            <td>
+              <div class="service-resource">
+                <span
+                  class="resource-icon"
+                  :class="p.kind"
+                  aria-hidden="true"
                 >
-                  {{ p.name }}
-                </NButton>
-                <div
-                  class="service-directory"
-                  :title="p.directory"
-                >
-                  {{ p.directory }}
+                  <component
+                    :is="icons[p.kind]"
+                    :size="20"
+                  />
+                </span>
+                <div class="service-resource-details">
+                  <NButton
+                    class="service-title"
+                    text
+                    :aria-label="'查看 ' + p.name + ' 的发布详情'"
+                    :aria-expanded="selected === p.id"
+                    @click="selected = selected === p.id ? '' : p.id"
+                  >
+                    {{ p.name }}
+                  </NButton>
+                  <div
+                    class="service-directory"
+                    :title="p.directory"
+                  >
+                    {{ p.directory }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </td>
-          <td>{{ kindLabels[p.kind] }}</td>
-          <td>
-            <span
-              class="badge"
-              :class="
-                !p.valid && p.enabled
-                  ? 'invalid'
-                  : p.valid && p.enabled && snapshot?.server.running
-                    ? 'valid'
-                    : 'idle'
-              "
-            >
-              {{ status(p) }}
-            </span>
-          </td>
-          <td class="mono">{{ p.count.toLocaleString() }}</td>
-          <td>
-            <div class="row-actions">
-              <NButton
-                class="service-action service-preview"
-                quaternary
-                size="small"
-                :aria-label="'预览 ' + p.name"
-                title="预览"
-                :disabled="!p.valid || !p.enabled || !snapshot?.server.running"
-                attr-type="button"
-                @click="openPreview(p)"
+            </td>
+            <td>{{ kindLabels[p.kind] }}</td>
+            <td>
+              <span
+                class="badge"
+                :class="
+                  !p.valid && p.enabled
+                    ? 'invalid'
+                    : p.valid && p.enabled && snapshot?.server.running
+                      ? 'valid'
+                      : 'idle'
+                "
               >
-                <template #icon>
-                  <Globe2
-                    :size="18"
-                    aria-hidden="true"
-                  />
-                </template>
-              </NButton>
-              <NDropdown
-                trigger="click"
-                :options="serviceMenu(p)"
-                @select="(key: string) => selectServiceAction(key, p)"
-              >
+                {{ status(p) }}
+              </span>
+            </td>
+            <td class="mono">{{ p.count.toLocaleString() }}</td>
+            <td>
+              <div class="row-actions">
                 <NButton
-                  class="service-action service-more"
+                  class="service-action service-preview"
                   quaternary
                   size="small"
-                  :aria-label="'更多操作 ' + p.name"
-                  aria-haspopup="menu"
+                  :aria-label="'预览 ' + p.name"
+                  title="预览"
+                  :disabled="!p.valid || !p.enabled || !snapshot?.server.running"
                   attr-type="button"
+                  @click="openPreview(p)"
                 >
-                  <MoreHorizontal
-                    :size="20"
-                    aria-hidden="true"
-                  />
+                  <template #icon>
+                    <Globe2
+                      :size="18"
+                      aria-hidden="true"
+                    />
+                  </template>
                 </NButton>
-              </NDropdown>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </NTable>
-    <div
-      v-else
-      class="empty-state"
-    >
-      <div class="empty-art">
-        <FolderOpen :size="36" />
-        <span><Plus :size="14" /></span>
-      </div>
-      <h2>{{ search ? '没有匹配的目录' : '发布你的第一个资源目录' }}</h2>
-      <p>
-        选择已有瓦片、模型或图片目录，生成服务地址。
-        <br />
-        目录中的文件由 Nginx 直接提供给客户端。
-      </p>
-      <NButton
-        v-if="!search"
-        class="primary"
-        attr-type="button"
-        type="primary"
-        @click="openService()"
+                <NDropdown
+                  trigger="click"
+                  :options="serviceMenu(p)"
+                  @select="(key: string) => selectServiceAction(key, p)"
+                >
+                  <NButton
+                    class="service-action service-more"
+                    quaternary
+                    size="small"
+                    :aria-label="'更多操作 ' + p.name"
+                    aria-haspopup="menu"
+                    attr-type="button"
+                  >
+                    <MoreHorizontal
+                      :size="20"
+                      aria-hidden="true"
+                    />
+                  </NButton>
+                </NDropdown>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </NTable>
+      <div
+        v-else
+        class="empty-state"
       >
-        <Plus :size="16" />
-        登记资源目录
-      </NButton>
-    </div>
-    <div class="panel-foot">
-      <Activity :size="14" />
-      目录变化自动检查，另每 30 秒复查。资源失效时禁用映射。
-      <span>索引不复制文件</span>
+        <div class="empty-art">
+          <FolderOpen :size="36" />
+          <span><Plus :size="14" /></span>
+        </div>
+        <h2>{{ search ? '没有匹配的目录' : '发布你的第一个资源目录' }}</h2>
+        <p>
+          选择已有瓦片、模型或图片目录，生成服务地址。
+          <br />
+          目录中的文件由 Nginx 直接提供给客户端。
+        </p>
+        <NButton
+          v-if="!search"
+          class="primary"
+          attr-type="button"
+          type="primary"
+          @click="openService()"
+        >
+          <Plus :size="16" />
+          登记资源目录
+        </NButton>
+      </div>
     </div>
   </section>
   <section
@@ -373,33 +364,4 @@ function selectServiceAction(key: string, publication: Publication) {
       </div>
     </details>
   </section>
-  <div class="guide-grid">
-    <div>
-      <span class="guide-number">01</span>
-      <strong>选择资源目录</strong>
-      <p>
-        支持已有 XYZ、Quantized Mesh、
-        <br />
-        3D Tiles、模型和图片文件。
-      </p>
-    </div>
-    <div>
-      <span class="guide-number">02</span>
-      <strong>配置发布映射</strong>
-      <p>
-        设置 URL 前缀与监听端口，
-        <br />
-        软件自动检查资源有效性。
-      </p>
-    </div>
-    <div>
-      <span class="guide-number">03</span>
-      <strong>连接你的地图</strong>
-      <p>
-        启动服务，复制 URL 或接入代码，
-        <br />
-        在 Cesium 中加载本地资源。
-      </p>
-    </div>
-  </div>
 </template>

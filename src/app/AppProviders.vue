@@ -9,6 +9,10 @@ import {
 } from 'naive-ui'
 const themeOverrides: GlobalThemeOverrides = {
   common: {
+    fontSize: '16px',
+    fontSizeSmall: '16px',
+    fontSizeMedium: '16px',
+    fontSizeLarge: '16px',
     primaryColor: '#3268e7',
     primaryColorHover: '#477bea',
     primaryColorPressed: '#2556c6',

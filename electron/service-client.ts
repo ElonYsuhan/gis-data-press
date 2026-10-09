@@ -16,7 +16,15 @@ export async function serviceRequest(
     method: 'POST',
     headers: { Authorization: `Bearer ${endpoint.token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(args),
-    signal: AbortSignal.timeout(name === 'inspect' ? 65000 : 30000),
+    signal: AbortSignal.timeout(
+      name === 'inspect'
+        ? 65000
+        : ['ping', 'health'].includes(name)
+          ? 3000
+          : ['snapshot', 'listResources'].includes(name)
+            ? 8000
+            : 30000,
+    ),
   })
   const result = await response.json()
   if (!response.ok) {
@@ -107,6 +115,61 @@ export async function connectService(
     throw new Error('发布后台启动失败，请检查 service.log')
   }
   const connected = endpoint
+  let recovering: Promise<Manager> | undefined
+  async function request(name: string, args: unknown[]) {
+    try {
+      if (recovering) {
+        const recovered = await recovering
+        return (recovered as any)[name](...args)
+      }
+      return await serviceRequest(connected, name, args)
+    } catch (error) {
+      if (
+        !['snapshot', 'listResources'].includes(name) ||
+        !/timeout|aborted/i.test(String(error))
+      ) {
+        throw error
+      }
+      if (!recovering) {
+        recovering = (async () => {
+          const info = await serviceRequest(connected, 'ping')
+          const health = await serviceRequest(connected, 'health')
+          if (
+            info.pid !== connected.pid ||
+            health.activeJobs ||
+            health.activeDownloads ||
+            health.mutations
+          ) {
+            throw new Error('后台读取超时；有任务或操作进行中，已保留后台，请稍后重试')
+          }
+          process.kill(connected.pid, 'SIGTERM')
+          for (let attempt = 0; attempt < 20; attempt++) {
+            try {
+              process.kill(connected.pid, 0)
+            } catch {
+              return connectService(dataDirectory, project, resources)
+            }
+            await new Promise((resolve) => setTimeout(resolve, 100))
+          }
+          process.kill(connected.pid, 'SIGKILL')
+          for (let attempt = 0; attempt < 30; attempt++) {
+            try {
+              process.kill(connected.pid, 0)
+            } catch {
+              return connectService(dataDirectory, project, resources)
+            }
+            await new Promise((resolve) => setTimeout(resolve, 100))
+          }
+          throw new Error('后台恢复失败，请重新打开软件')
+        })()
+        recovering.catch(() => {
+          recovering = undefined
+        })
+      }
+      const recovered = await recovering
+      return (recovered as any)[name](...args)
+    }
+  }
   // Closing the management client must never stop the independent publishing daemon.
   return new Proxy({} as Manager, {
     get: (_target, name: string) =>
@@ -114,6 +177,6 @@ export async function connectService(
         ? undefined
         : name === 'close'
           ? async () => {}
-          : (...args: unknown[]) => serviceRequest(connected, name, args),
+          : (...args: unknown[]) => request(name, args),
   })
 }

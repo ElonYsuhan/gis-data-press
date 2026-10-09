@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { watch, onBeforeUnmount } from 'vue'
 import { NButton } from 'naive-ui'
 import {
   RadioTower,
   Workflow,
   Settings2,
   ExternalLink,
-  ChevronRight,
   Check,
   CircleAlert,
   X,
@@ -20,7 +20,7 @@ import ProcessingPage from './pages/ProcessingPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import WorkspaceDialogs from './pages/WorkspaceDialogs.vue'
 import { useWorkspace, provideWorkspace } from './app/useWorkspace'
-import type { ServiceKind } from '../shared/contracts'
+const macDesktop = desktop && navigator.userAgent.includes('Mac')
 const workspace = useWorkspace()
 provideWorkspace(workspace)
 const {
@@ -30,19 +30,35 @@ const {
   busy,
   error,
   notice,
-  inspection,
-  form,
   request,
+  inspection,
   publications,
   activeJobs,
   action,
   inspect,
-  openService,
   publishJob,
 } = workspace
+let noticeTimer: ReturnType<typeof setTimeout> | undefined
+watch(notice, (message) => {
+  clearTimeout(noticeTimer)
+  if (message) {
+    noticeTimer = setTimeout(() => {
+      notice.value = ''
+    }, 4000)
+  }
+})
+onBeforeUnmount(() => clearTimeout(noticeTimer))
 </script>
 <template>
-  <div class="app-shell">
+  <div
+    class="app-shell"
+    :class="{ 'mac-desktop': macDesktop }"
+  >
+    <div
+      v-if="macDesktop"
+      class="window-drag-region"
+      aria-hidden="true"
+    ></div>
     <aside class="sidebar">
       <div class="brand">
         <img
@@ -52,11 +68,13 @@ const {
         />
         <div>
           GeoPress
-          <small>数据加工与目录发布</small>
+          <small>GIS 数据工具</small>
         </div>
         <NButton
           v-if="desktop"
           class="browser-button"
+          quaternary
+          :bordered="false"
           aria-label="在默认浏览器打开管理界面"
           title="在默认浏览器打开管理界面"
           attr-type="button"
@@ -64,10 +82,6 @@ const {
         >
           <ExternalLink :size="16" />
         </NButton>
-      </div>
-      <div class="workspace-label">
-        工作空间
-        <span>LOCAL</span>
       </div>
       <nav aria-label="主导航">
         <NButton
@@ -137,86 +151,15 @@ const {
         <small>v0.1.0 · Desktop Edition</small>
       </div>
     </aside>
-    <main :class="{ 'process-workspace': tab === 'process' }">
-      <header class="topbar">
-        <div class="breadcrumb">
-          工作空间
-          <ChevronRight :size="14" />
-          {{
-            tab === 'resources'
-              ? '资源下载'
-              : tab === 'services'
-                ? '服务发布'
-                : tab === 'process'
-                  ? '数据处理'
-                  : tab === 'jobs'
-                    ? '任务中心'
-                    : '引擎与设置'
-          }}
-        </div>
-        <span class="local-tag">
-          <span class="dot online"></span>
-          本地工作环境
-        </span>
-      </header>
+    <main
+      :class="{
+        'process-workspace': tab === 'process',
+        'services-workspace': tab === 'services',
+        'resources-workspace': tab === 'resources',
+      }"
+    >
       <div class="content">
-        <div
-          v-if="error"
-          class="alert error"
-          role="alert"
-        >
-          <CircleAlert :size="18" />
-          <span>{{ error }}</span>
-          <NButton
-            class="alert-close"
-            circle
-            quaternary
-            aria-label="关闭错误提示"
-            attr-type="button"
-            @click="error = ''"
-          >
-            <X :size="16" />
-          </NButton>
-        </div>
-        <div
-          v-if="notice"
-          class="alert success"
-          role="status"
-        >
-          <Check :size="18" />
-          <span>{{ notice }}</span>
-          <NButton
-            class="alert-close"
-            circle
-            quaternary
-            aria-label="关闭操作提示"
-            attr-type="button"
-            @click="notice = ''"
-          >
-            <X :size="16" />
-          </NButton>
-        </div>
-        <Resources
-          v-if="tab === 'resources'"
-          @process="
-            (kind, path) => {
-              request.kind = kind
-              request.input = path
-              request.inputs = [path]
-              request.outputFormat = 'package'
-              inspection = undefined
-              tab = 'process'
-            }
-          "
-          @publish="
-            async (kind, path) => {
-              await openService()
-              form.kind = kind as ServiceKind
-              form.directory = path
-              form.name = path.split(/[\\/]/).pop() || '本地资源'
-            }
-          "
-        />
+        <Resources v-if="tab === 'resources'" />
         <ServicesPage v-if="tab === 'services'" />
 
         <ProcessingPage v-if="tab === 'process'" />
@@ -242,6 +185,58 @@ const {
         />
 
         <SettingsPage v-if="tab === 'settings'" />
+      </div>
+      <footer
+        class="statusbar"
+        aria-label="工作状态"
+      >
+        <div class="statusbar-summary">
+          <span>
+            <span class="dot online"></span>
+            本地工作环境
+          </span>
+          <span>{{ snapshot?.server.running ? '发布服务运行中' : '发布服务已停止' }}</span>
+          <span>进行中任务 {{ activeJobs }}</span>
+          <span class="statusbar-version">GeoPress · v0.1.0</span>
+        </div>
+      </footer>
+      <div class="workspace-notifications">
+        <div
+          v-if="error"
+          class="alert error workspace-toast"
+          role="alert"
+        >
+          <CircleAlert :size="18" />
+          <span>{{ error }}</span>
+          <NButton
+            class="alert-close"
+            circle
+            quaternary
+            aria-label="关闭错误提示"
+            attr-type="button"
+            @click="error = ''"
+          >
+            <X :size="16" />
+          </NButton>
+        </div>
+        <div
+          v-if="notice"
+          class="alert success workspace-toast"
+          role="status"
+        >
+          <Check :size="18" />
+          <span>{{ notice }}</span>
+          <NButton
+            class="alert-close"
+            circle
+            quaternary
+            aria-label="关闭操作提示"
+            attr-type="button"
+            @click="notice = ''"
+          >
+            <X :size="16" />
+          </NButton>
+        </div>
       </div>
     </main>
   </div>

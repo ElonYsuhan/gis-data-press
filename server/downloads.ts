@@ -13,6 +13,9 @@ export class Downloads {
     private directory: string,
     private fetcher: typeof fetch = fetch,
   ) {}
+  get hasActiveDownloads(): boolean {
+    return this.active.size > 0 || this.transfers.size > 0
+  }
   async initialize() {
     try {
       this.records = JSON.parse(await readFile(path.join(this.directory, 'resources.json'), 'utf8'))

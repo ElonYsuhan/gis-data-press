@@ -32,19 +32,22 @@ try {
       const metrics = await page.evaluate(() => {
         const content = document.querySelector('.content')
         const form = document.querySelector('.processing-form')
+        const fields = form.querySelector('.processing-fields')
         const button = form.querySelector('.process-actions>.primary')
         const bounds = button.getBoundingClientRect()
         return {
           height: innerHeight,
           documentScroll: document.documentElement.scrollHeight > innerHeight,
           contentScroll: content.scrollHeight > content.clientHeight + 1,
-          formOverflow: form.scrollHeight > form.clientHeight + 1,
-          formOverflowY: getComputedStyle(form).overflowY,
+          formOverflow: fields.scrollHeight > fields.clientHeight + 1,
+          formOverflowY: getComputedStyle(fields).overflowY,
           formHeight: form.clientHeight,
           formScroll: form.scrollHeight,
           formBottom: form.getBoundingClientRect().bottom,
           buttonBottom: bounds.bottom,
           buttonTop: bounds.top,
+          fieldsBottom: fields.getBoundingClientRect().bottom,
+          actionsTop: form.querySelector('.process-actions').getBoundingClientRect().top,
         }
       })
       assert.equal(metrics.documentScroll, false, JSON.stringify({ width, height, kind, metrics }))
@@ -57,6 +60,7 @@ try {
         )
       }
       assert.ok(metrics.buttonBottom <= metrics.height && metrics.buttonTop > 0)
+      assert.ok(metrics.fieldsBottom <= metrics.actionsTop + 1)
     }
   }
   await page.getByRole('radio', { name: /影像切片/ }).check()
@@ -72,7 +76,7 @@ try {
   await page.getByLabel('输入 TIFF / VRT 文件').fill('')
   assert.equal(await page.locator('.fusion-source').count(), 0)
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1440, 940))
-  await page.locator('.processing-form').evaluate((form) => {
+  await page.locator('.processing-fields').evaluate((form) => {
     form.scrollTop = 0
   })
   await page.screenshot({ path: 'output/playwright/processing-redesigned.png', fullPage: true })

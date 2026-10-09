@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { NForm, NProgress } from 'naive-ui'
-import { NButton, NInput, NCheckbox } from 'naive-ui'
+import { NButton, NInput, NCheckbox, NPagination } from 'naive-ui'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Download, Search, FolderOpen, Plus, X, RefreshCw } from 'lucide-vue-next'
-import AppDialog from '../../components/AppDialog.vue'
-import type { DialogHandle } from '../../components/dialog'
 import { api as managementAPI } from '../../services/api'
 const api = managementAPI
 import type { AssetKind, LocalAsset, BoundaryResult } from '../../../shared/contracts'
-const emit = defineEmits<{
-  process: [kind: 'imagery' | 'terrain', path: string]
-  publish: [kind: AssetKind, path: string]
-}>()
 const types: { kind: AssetKind; name: string }[] = [
   { kind: 'imagery', name: '影像数据' },
   { kind: 'terrain', name: '地形数据' },
@@ -35,9 +29,6 @@ const searching = ref(false)
 const searched = ref(false)
 const error = ref('')
 const notice = ref('')
-const page = ref(1)
-const pending = ref<LocalAsset>()
-const confirmation = ref<DialogHandle>()
 const levelNames: Record<string, string> = {
   country: '国家',
   province: '省级',
@@ -45,16 +36,12 @@ const levelNames: Record<string, string> = {
   district: '区县',
 }
 const filtered = computed(() => records.value.filter((r) => r.kind === kind.value))
-const pages = computed(() => Math.max(1, Math.ceil(filtered.value.length / 3)))
-const visible = computed(() =>
-  filtered.value.slice(
-    (Math.min(page.value, pages.value) - 1) * 3,
-    Math.min(page.value, pages.value) * 3,
-  ),
-)
-const resultPage = ref(1)
-const visibleMatches = computed(() =>
-  matches.value.slice((resultPage.value - 1) * 4, resultPage.value * 4),
+const localPage = ref(1)
+const pageSize = 10
+const localPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)))
+const currentPage = computed(() => Math.min(localPage.value, localPages.value))
+const visibleResources = computed(() =>
+  filtered.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
 let interval: ReturnType<typeof setInterval>
 let polling = false
@@ -102,7 +89,6 @@ async function search() {
   try {
     matches.value = await api.searchBoundaries(query.value)
     searched.value = true
-    resultPage.value = 1
   } catch (e) {
     error.value = String(e)
   } finally {
@@ -138,7 +124,6 @@ async function download() {
       adcode: selected.value?.adcode,
       children: children.value,
     })
-    page.value = 1
   }, '下载已开始，文件写入指定目录；关闭管理窗口后继续下载。')
 }
 function selectBoundary(result: BoundaryResult) {
@@ -147,7 +132,7 @@ function selectBoundary(result: BoundaryResult) {
 }
 function selectType(value: AssetKind) {
   kind.value = value
-  page.value = 1
+  localPage.value = 1
   error.value = ''
   notice.value = ''
 }
@@ -168,21 +153,6 @@ function size(n: number) {
     : n >= 1e3
       ? (n / 1e3).toFixed(1) + ' KB'
       : n + ' B'
-}
-async function askForget(r: LocalAsset) {
-  pending.value = r
-  confirmation.value?.showModal()
-  confirmation.value?.querySelector<HTMLButtonElement>('[data-cancel]')?.focus()
-}
-async function forget() {
-  if (!pending.value) {
-    return
-  }
-  await action(async () => {
-    await api.forgetResource(pending.value!.id)
-    confirmation.value?.close()
-    pending.value = undefined
-  }, '已移除资源索引，磁盘文件保留。')
 }
 onMounted(() => {
   void refresh()
@@ -271,7 +241,7 @@ onBeforeUnmount(() => clearInterval(interval))
             :aria-busy="searching"
           >
             <NButton
-              v-for="r in visibleMatches"
+              v-for="r in matches"
               :key="r.adcode"
               :class="{ chosen: selected?.adcode === r.adcode }"
               :aria-pressed="selected?.adcode === r.adcode"
@@ -297,38 +267,6 @@ onBeforeUnmount(() => clearInterval(interval))
               }}
             </div>
           </div>
-          <div
-            v-if="matches.length > 4"
-            class="resource-pagination"
-          >
-            <NButton
-              class="ghost"
-              :disabled="resultPage === 1"
-              attr-type="button"
-              @click="resultPage--"
-            >
-              上一页
-            </NButton>
-            <span>
-              {{ resultPage }} / {{ Math.ceil(matches.length / 4) }} · {{ matches.length }} 项（最多
-              100 项）
-            </span>
-            <NButton
-              class="ghost"
-              :disabled="resultPage * 4 >= matches.length"
-              attr-type="button"
-              @click="resultPage++"
-            >
-              下一页
-            </NButton>
-          </div>
-          <label
-            v-if="selected && selected.level !== 'district'"
-            class="checkbox"
-          >
-            <NCheckbox v-model:checked="children" />
-            下载下一级行政区边界集合
-          </label>
         </template>
         <template v-else>
           <div class="section-title">
@@ -366,25 +304,8 @@ onBeforeUnmount(() => clearInterval(interval))
           class="resource-destination"
           @submit.prevent="download"
         >
-          <label for="download-directory">下载到本地目录</label>
-          <div class="path-input">
-            <NInput
-              v-model:value="directory"
-              placeholder="选择或输入绝对目录路径"
-              :input-props="{ id: 'download-directory', required: true }"
-            />
-            <NButton
-              class="ghost"
-              :disabled="busy"
-              attr-type="button"
-              @click="chooseDirectory"
-            >
-              <FolderOpen :size="15" />
-              选择
-            </NButton>
-          </div>
-          <div class="resource-download-footer">
-            <small>
+          <div class="download-options-heading">
+            <label for="download-directory">
               {{
                 kind === 'boundary'
                   ? selected?.name
@@ -392,7 +313,37 @@ onBeforeUnmount(() => clearInterval(interval))
                     : '请先检索并选择区域'
                   : '压缩包下载后请自行解压，登记完整目录。'
               }}
-            </small>
+            </label>
+            <label
+              v-if="kind === 'boundary' && selected && selected.level !== 'district'"
+              class="checkbox"
+              title="下载下一级行政区边界集合"
+            >
+              <NCheckbox v-model:checked="children" />
+              包含下一级边界
+            </label>
+          </div>
+          <div class="download-directory-row">
+            <NInput
+              v-model:value="directory"
+              class="directory-picker"
+              placeholder="选择下载目录，或输入绝对路径"
+              :input-props="{ id: 'download-directory', required: true }"
+            >
+              <template #suffix>
+                <NButton
+                  quaternary
+                  class="directory-picker-button"
+                  :disabled="busy"
+                  attr-type="button"
+                  aria-label="选择下载目录"
+                  title="选择目录"
+                  @click="chooseDirectory"
+                >
+                  <FolderOpen :size="18" />
+                </NButton>
+              </template>
+            </NInput>
             <NButton
               class="primary"
               :disabled="
@@ -464,167 +415,101 @@ onBeforeUnmount(() => clearInterval(interval))
           </div>
         </NForm>
         <div class="local-resource-list">
-          <article
-            v-for="r in visible"
-            :key="r.id"
+          <table
+            class="local-resource-table"
+            aria-label="本地资源"
           >
-            <div class="local-resource-title">
-              <strong>{{ r.name }}</strong>
-              <span
-                class="badge"
-                :class="
-                  r.status === 'ready' && r.exists
-                    ? 'valid'
-                    : r.status === 'failed' || r.exists === false
-                      ? 'invalid'
-                      : 'idle'
-                "
+            <thead>
+              <tr>
+                <th scope="col">文件 / 路径</th>
+                <th scope="col">状态</th>
+                <th scope="col">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="r in visibleResources"
+                :key="r.id"
               >
-                {{ status(r) }}
-              </span>
-            </div>
-            <code :title="r.path">{{ r.path }}</code>
-            <small v-if="r.status === 'downloading'">
-              {{ size(r.received) }} / {{ r.size ? size(r.size) : '大小未知' }}
-            </small>
-            <NProgress
-              v-if="r.status === 'downloading' && r.size"
-              type="line"
-              :percentage="Math.max(0, Math.min(100, (r.received / r.size) * 100))"
-              :show-indicator="false"
-              aria-label="下载进度"
-            />
-            <p
-              v-if="r.error"
-              class="text-error"
-            >
-              {{ r.error }}
-            </p>
-            <div class="local-resource-actions">
-              <NButton
-                v-if="r.status === 'downloading'"
-                class="ghost"
-                attr-type="button"
-                @click="action(() => api.cancelDownload(r.id))"
-              >
-                取消下载
-              </NButton>
-              <template v-else>
-                <NButton
-                  v-if="r.exists"
-                  class="ghost"
-                  attr-type="button"
-                  @click="action(() => api.reveal(r.path))"
+                <td>
+                  <strong :title="r.name">{{ r.name }}</strong>
+                  <code :title="r.path">{{ r.path }}</code>
+                  <small v-if="r.status === 'downloading'">
+                    {{ size(r.received) }} / {{ r.size ? size(r.size) : '大小未知' }}
+                  </small>
+                  <NProgress
+                    v-if="r.status === 'downloading' && r.size"
+                    type="line"
+                    :percentage="Math.max(0, Math.min(100, (r.received / r.size) * 100))"
+                    :show-indicator="false"
+                    aria-label="下载进度"
+                  />
+                  <p
+                    v-if="r.error"
+                    class="text-error"
+                  >
+                    {{ r.error }}
+                  </p>
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    :class="
+                      r.status === 'ready' && r.exists
+                        ? 'valid'
+                        : r.status === 'failed' || r.exists === false
+                          ? 'invalid'
+                          : 'idle'
+                    "
+                  >
+                    {{ status(r) }}
+                  </span>
+                </td>
+                <td>
+                  <NButton
+                    v-if="r.status === 'downloading'"
+                    class="icon-button"
+                    attr-type="button"
+                    title="取消下载"
+                    :aria-label="'取消下载 ' + r.name"
+                    @click="action(() => api.cancelDownload(r.id))"
+                  >
+                    <X :size="18" />
+                  </NButton>
+                  <NButton
+                    v-else
+                    :disabled="!r.exists"
+                    class="icon-button"
+                    attr-type="button"
+                    title="打开目录"
+                    :aria-label="'打开目录 ' + r.name"
+                    @click="action(() => api.reveal(r.path))"
+                  >
+                    <FolderOpen :size="18" />
+                  </NButton>
+                </td>
+              </tr>
+              <tr v-if="!filtered.length">
+                <td
+                  colspan="3"
+                  class="local-resource-empty"
                 >
-                  打开
-                </NButton>
-                <NButton
-                  v-if="
-                    r.exists &&
-                    !r.isDirectory &&
-                    /\.(tiff?|vrt)$/i.test(r.path) &&
-                    (kind === 'imagery' || kind === 'terrain')
-                  "
-                  class="ghost"
-                  attr-type="button"
-                  @click="emit('process', kind, r.path)"
-                >
-                  加工
-                </NButton>
-                <NButton
-                  v-if="r.exists && kind !== 'boundary'"
-                  class="ghost"
-                  attr-type="button"
-                  @click="
-                    emit(
-                      'publish',
-                      kind,
-                      r.isDirectory
-                        ? r.path
-                        : r.path.slice(
-                            0,
-                            Math.max(r.path.lastIndexOf('/'), r.path.lastIndexOf('\\')),
-                          ) || '/',
-                    )
-                  "
-                >
-                  发布
-                </NButton>
-                <NButton
-                  class="ghost"
-                  attr-type="button"
-                  @click="askForget(r)"
-                >
-                  移除索引
-                </NButton>
-              </template>
-            </div>
-          </article>
-          <div
-            v-if="!filtered.length"
-            class="boundary-placeholder"
-          >
-            该类型暂无本地资源
-          </div>
+                  该类型暂无本地资源
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div
-          v-if="filtered.length"
-          class="resource-pagination"
-        >
-          <NButton
-            class="ghost"
-            :disabled="page <= 1"
-            attr-type="button"
-            @click="page--"
-          >
-            上一页
-          </NButton>
-          <span>{{ Math.min(page, pages) }} / {{ pages }} · {{ filtered.length }} 项</span>
-          <NButton
-            class="ghost"
-            :disabled="page >= pages"
-            attr-type="button"
-            @click="page++"
-          >
-            下一页
-          </NButton>
+        <div class="local-resource-pagination">
+          <span>共 {{ filtered.length }} 项</span>
+          <NPagination
+            :page="currentPage"
+            :page-count="localPages"
+            :page-slot="5"
+            @update:page="localPage = $event"
+          />
         </div>
       </section>
     </div>
-    <AppDialog
-      ref="confirmation"
-      class="service-dialog removal-dialog"
-      aria-labelledby="forget-title"
-      @cancel="busy && $event.preventDefault()"
-    >
-      <div class="advanced-body">
-        <h2 id="forget-title">确认移除资源索引？</h2>
-        <p class="resource-description">
-          {{ pending?.name }}
-          <br />
-          仅移除路径记录，磁盘文件保留。
-        </p>
-        <div class="dialog-footer">
-          <NButton
-            data-cancel
-            class="ghost"
-            :disabled="busy"
-            attr-type="button"
-            @click="confirmation?.close()"
-          >
-            取消
-          </NButton>
-          <NButton
-            class="primary destructive"
-            :disabled="busy"
-            attr-type="button"
-            type="error"
-            @click="forget"
-          >
-            确认移除
-          </NButton>
-        </div>
-      </div>
-    </AppDialog>
   </div>
 </template>

@@ -10,7 +10,7 @@
   color: #253344;
   background: #f5f7fa;
   font-synthesis: none;
-  font-size: 13px;
+  font-size: 16px;
   --muted: #758396;
   --line: #e6ebf1;
   --blue: #3268e7;
@@ -76,11 +76,11 @@ input:not([class])::placeholder {
 label {
   display: block;
   font-weight: 550;
-  font-size: 12px;
+  font-size: 16px;
   margin-bottom: 8px;
 }
 small {
-  font-size: 11px;
+  font-size: 16px;
   color: var(--muted);
 }
 h1,

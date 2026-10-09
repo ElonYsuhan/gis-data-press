@@ -137,6 +137,7 @@ export function useWorkspace() {
           : n + ' B'
   const time = (date: string) => new Date(date).toLocaleString('zh-CN', { hour12: false })
   let interval: ReturnType<typeof setInterval>
+  const connectionError = ref('')
   let polling = false
   let restoreFocus: HTMLElement | null = null
   async function poll() {
@@ -146,11 +147,18 @@ export function useWorkspace() {
     polling = true
     try {
       snapshot.value = await api.snapshot()
+      if (error.value === connectionError.value) {
+        error.value = ''
+      }
+      connectionError.value = ''
       if (!settingsDirty.value) {
         settings.value = { ...snapshot.value.settings }
       }
     } catch (e) {
-      error.value = String(e)
+      connectionError.value = /timeout|aborted/i.test(String(e))
+        ? '读取后台状态超时，正在自动重试。'
+        : '暂时无法连接后台服务，正在自动重试。'
+      error.value = connectionError.value
     } finally {
       polling = false
     }

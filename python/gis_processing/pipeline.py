@@ -102,7 +102,7 @@ def process_data(request, engines):
                 if engines.get('gdal')
                 else None
             )
-            if not warp and sibling and sibling.is_file():
+            if sibling and sibling.is_file():
                 warp = str(sibling)
             if not warp:
                 raise ValueError('地形预处理需要 gdalwarp，请安装 GDAL')

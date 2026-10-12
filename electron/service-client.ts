@@ -50,7 +50,7 @@ export async function connectService(
   let endpoint = await existing()
   if (endpoint) {
     const info = await serviceRequest(endpoint, 'ping')
-    if ((info.protocol ?? 1) < 4) {
+    if ((info.protocol ?? 1) < 7) {
       const snapshot = await serviceRequest(endpoint, 'snapshot')
       if (
         snapshot.jobs.some((job: { status: string }) => ['queued', 'running'].includes(job.status))

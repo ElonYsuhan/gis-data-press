@@ -84,3 +84,50 @@
 .fusion-source .n-input-number {
   width: 155px;
 }
+
+.input-selection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  background: #f8faff;
+  color: #637891;
+}
+.input-selection > span {
+  flex: 1;
+  min-width: 0;
+}
+.selected-inputs {
+  margin-top: 10px;
+}
+.selected-inputs > summary {
+  cursor: pointer;
+  color: #526b90;
+}
+.selected-inputs .fusion-sources {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.selected-inputs .fusion-source {
+  border: 0;
+  border-bottom: 1px solid #e7edf5;
+  border-radius: 0;
+  background: transparent;
+}
+
+.processing-form .output-path-picker.n-input {
+  --n-height: 40px !important;
+  border-radius: 8px;
+}
+.output-path-picker .n-input__suffix {
+  margin-left: 8px;
+}
+.processing-form .output-path-picker-button.n-button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  color: #526b90;
+}

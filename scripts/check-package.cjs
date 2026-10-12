@@ -16,9 +16,21 @@ module.exports = async (context) => {
   for (const file of [
     platform === 'win32' ? 'nginx/nginx.exe' : 'nginx/nginx',
     platform === 'win32' ? 'python/gis-worker/gis-worker.exe' : 'python/gis-worker/gis-worker',
+    'ctb-tile' + (platform === 'win32' ? '.exe' : ''),
+    '3dtile' + (platform === 'win32' ? '.exe' : ''),
+    'gdal' + (platform === 'win32' ? '.exe' : ''),
+    'gdalwarp' + (platform === 'win32' ? '.exe' : ''),
+    'share/proj/proj.db',
   ]) {
     if (!fs.existsSync(path.join(root, file))) {
       throw new Error(`安装包缺少引擎: ${file}`)
     }
+  }
+  if (platform === 'darwin') {
+    require('node:child_process').execFileSync(
+      '/usr/bin/python3',
+      ['scripts/check-native-mac.py', root],
+      { stdio: 'inherit' },
+    )
   }
 }

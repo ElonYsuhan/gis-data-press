@@ -1,3 +1,4 @@
+import type { LanSnapshot } from './lan'
 export type ServiceKind = 'imagery' | 'terrain' | 'tileset' | 'model' | 'image'
 export type JobKind = 'imagery' | 'terrain' | 'osgb'
 export interface Resource {
@@ -100,6 +101,16 @@ export interface Snapshot {
   logs: string[]
 }
 export interface DesktopAPI {
+  lanCreateUser(name: string): Promise<void>
+  lanSwitchUser(id: string): Promise<void>
+  lanSnapshot(): Promise<LanSnapshot>
+  lanText(peerId: string, text: string): Promise<void>
+  lanOffer(peerId: string, paths: string[]): Promise<void>
+  lanAccept(id: string, directory: string): Promise<void>
+  lanCancel(id: string): Promise<void>
+  lanChoose(folder: boolean): Promise<string[]>
+  lanPreview(id: string): Promise<string | null>
+
   resources(): Promise<LocalAsset[]>
   searchBoundaries(query: string): Promise<BoundaryResult[]>
   downloadResource(request: DownloadRequest): Promise<string>
@@ -121,6 +132,7 @@ export interface DesktopAPI {
   saveSettings(settings: Settings): Promise<void>
   server(action: 'start' | 'stop'): Promise<void>
   submit(request: JobRequest): Promise<string>
+  removeJobs(ids: string[]): Promise<void>
   cancel(id: string): Promise<void>
   reveal(path: string): Promise<void>
   copy(text: string): Promise<void>

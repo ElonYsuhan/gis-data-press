@@ -5,3 +5,5 @@
 @import './styles/jobs.css';
 @import './styles/processing.css';
 @import './styles/naive-overrides.css';
+
+@import './styles/chat.css';

@@ -1,0 +1,278 @@
+.chat-workspace .content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chat-workspace .page-heading {
+  flex-shrink: 0;
+}
+.lan-online-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #64758d;
+}
+.lan-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.lan-people {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  background: #fbfcfe;
+}
+.lan-people-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 6px;
+  font-weight: 600;
+}
+.lan-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 6px 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 10px;
+  background: white;
+  color: #8293aa;
+}
+.lan-search input {
+  height: 34px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+}
+.lan-peer-list {
+  flex: 1;
+  overflow: auto;
+  padding: 0 8px;
+}
+.lan-peer-list button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 13px 12px;
+  gap: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  text-align: left;
+}
+.lan-peer-list button.active {
+  background: #eaf1ff;
+  color: #2c61db;
+}
+.lan-peer-list button > .dot {
+  margin-left: auto;
+}
+.lan-peer-list small,
+.lan-conversation-header small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #73839a;
+}
+.lan-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: #edf2fb;
+  color: #5d7caf;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.lan-no-peers {
+  padding: 30px 10px;
+  text-align: center;
+  color: #73839a;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.lan-no-peers small {
+  font-size: 12px;
+}
+.lan-conversation {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lan-conversation-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.lan-messages {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px;
+  background: #f8fafd;
+  overscroll-behavior: contain;
+}
+.lan-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.lan-message.out {
+  align-items: flex-end;
+}
+.lan-message-time {
+  font-size: 12px;
+  color: #8293aa;
+  margin-bottom: 7px;
+}
+.lan-text {
+  max-width: 80%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: white;
+  padding: 11px 15px;
+  border: 1px solid #e4eaf2;
+  border-radius: 3px 12px 12px;
+  line-height: 1.6;
+}
+.lan-message.out .lan-text {
+  background: #eaf1ff;
+  border-color: #dce7fc;
+  border-radius: 12px 3px 12px 12px;
+}
+.lan-file {
+  width: 340px;
+  max-width: 90%;
+  border: 1px solid #e1e8f2;
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px;
+}
+.lan-file-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #35537c;
+  margin-bottom: 8px;
+}
+.lan-file-title strong {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.lan-file > small {
+  display: block;
+  color: #8293aa;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.lan-transfer-state {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #64758d;
+  margin-top: 8px;
+}
+.lan-file-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.lan-transfer-error {
+  color: #bd4a43;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  margin-top: 8px;
+}
+.lan-image-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.lan-composer {
+  flex-shrink: 0;
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--line);
+}
+.lan-attachments {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.lan-composer textarea {
+  width: 100%;
+  height: 78px;
+  padding: 8px 4px;
+  resize: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  line-height: 1.6;
+}
+.lan-send-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lan-send-row small {
+  font-size: 12px;
+  color: #8293aa;
+}
+.lan-empty-conversation {
+  flex: 1;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  color: #8a9ab0;
+  font-size: 14px;
+}
+.lan-error {
+  flex-shrink: 0;
+  font-size: 13px;
+  padding: 8px 0 0;
+  color: #bd4a43;
+}
+
+.lan-user-controls {
+  padding: 0 16px 12px;
+  display: grid;
+  gap: 8px;
+}
+.lan-user-controls select,
+.lan-user-controls input {
+  min-width: 0;
+  width: 100%;
+  height: 34px;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  background: white;
+  padding: 0 10px;
+  color: #334155;
+}
+.lan-user-controls form {
+  display: flex;
+  gap: 6px;
+}

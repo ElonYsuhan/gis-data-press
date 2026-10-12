@@ -37,18 +37,6 @@ const {
   openAdvancedParameters,
   selectProcessingKind,
 } = useWorkspaceContext()
-const additionalInputs = computed({
-  get: () => (request.value.inputs ?? []).filter((path) => path !== request.value.input).join('\n'),
-  set: (value: string) => {
-    request.value.inputs = [
-      request.value.input,
-      ...value
-        .split('\n')
-        .map((path) => path.trim())
-        .filter(Boolean),
-    ]
-  },
-})
 const inputFiles = computed(() => [
   ...new Set([request.value.input, ...(request.value.inputs ?? [])].filter(Boolean)),
 ])
@@ -141,7 +129,27 @@ function setOffset(path: string, value: number | null) {
           <label for="input-path">
             {{ request.kind === 'osgb' ? '输入 OSGB 完整目录' : '输入 TIFF / VRT 文件' }}
           </label>
-          <div class="path-input">
+          <div
+            v-if="request.kind !== 'osgb'"
+            class="input-selection"
+          >
+            <FolderOpen :size="18" />
+            <span :title="inputFiles.join('\n')">
+              {{
+                inputFiles.length ? `已选择 ${inputFiles.length} 个文件` : '选择 TIFF / VRT，可多选'
+              }}
+            </span>
+            <NButton
+              attr-type="button"
+              @click="action(() => choose('input'))"
+            >
+              {{ inputFiles.length ? '重新选择' : '选择文件' }}
+            </NButton>
+          </div>
+          <div
+            v-else
+            class="path-input"
+          >
             <NInput
               :value="request.input"
               placeholder="选择或输入本地绝对路径"
@@ -158,71 +166,62 @@ function setOffset(path: string, value: number | null) {
             </NButton>
           </div>
           <details
-            v-if="request.kind !== 'osgb'"
-            class="manual-paths"
-          >
-            <summary>手动添加路径</summary>
-            <label for="additional-inputs">其他输入文件（可多选，或每行填写一个路径）</label>
-            <NInput
-              v-model:value="additionalInputs"
-              type="textarea"
-              :autosize="{ minRows: 2, maxRows: 4 }"
-              :input-props="{ id: 'additional-inputs' }"
-              placeholder="可留空；添加相邻或重叠的 TIFF / VRT"
-            />
-          </details>
-          <div
             v-if="inputFiles.length && request.kind !== 'osgb'"
-            class="fusion-sources"
+            class="selected-inputs"
           >
+            <summary>查看文件与融合设置（{{ inputFiles.length }}）</summary>
             <div
-              v-for="(file, index) in inputFiles"
-              :key="file"
-              class="fusion-source"
+              v-if="inputFiles.length"
+              class="fusion-sources"
             >
-              <span class="source-file-details">
-                <strong :title="file">{{ file.split(/[\\/]/).pop() }}</strong>
-                <small :title="file">{{ file }}</small>
-              </span>
-              <template v-if="request.fusionPolicy === 'order'">
-                <NButton
-                  size="small"
-                  :disabled="index === 0"
-                  :aria-label="'上移 ' + file"
-                  @click="moveInput(index, -1)"
-                >
-                  上移
-                </NButton>
-                <NButton
-                  size="small"
-                  :disabled="index === inputFiles.length - 1"
-                  :aria-label="'下移 ' + file"
-                  @click="moveInput(index, 1)"
-                >
-                  下移
-                </NButton>
-              </template>
-              <NInputNumber
-                v-if="request.kind === 'terrain'"
-                :value="request.heightOffsets?.[file] ?? 0"
-                :min="-10000"
-                :max="10000"
-                :aria-label="file + ' 高程校正米'"
-                @update:value="(value) => setOffset(file, value)"
+              <div
+                v-for="(file, index) in inputFiles"
+                :key="file"
+                class="fusion-source"
               >
-                <template #suffix>米校正</template>
-              </NInputNumber>
-              <NButton
-                quaternary
-                size="small"
-                class="source-remove"
-                :aria-label="'移除输入 ' + file"
-                @click="removeInput(index)"
-              >
-                <template #icon><X :size="16" /></template>
-              </NButton>
+                <span class="source-file-details">
+                  <strong :title="file">{{ file.split(/[\\/]/).pop() }}</strong>
+                </span>
+                <template v-if="request.fusionPolicy === 'order'">
+                  <NButton
+                    size="small"
+                    :disabled="index === 0"
+                    :aria-label="'上移 ' + file"
+                    @click="moveInput(index, -1)"
+                  >
+                    上移
+                  </NButton>
+                  <NButton
+                    size="small"
+                    :disabled="index === inputFiles.length - 1"
+                    :aria-label="'下移 ' + file"
+                    @click="moveInput(index, 1)"
+                  >
+                    下移
+                  </NButton>
+                </template>
+                <NInputNumber
+                  v-if="request.kind === 'terrain'"
+                  :value="request.heightOffsets?.[file] ?? 0"
+                  :min="-10000"
+                  :max="10000"
+                  :aria-label="file + ' 高程校正米'"
+                  @update:value="(value) => setOffset(file, value)"
+                >
+                  <template #suffix>米校正</template>
+                </NInputNumber>
+                <NButton
+                  quaternary
+                  size="small"
+                  class="source-remove"
+                  :aria-label="'移除输入 ' + file"
+                  @click="removeInput(index)"
+                >
+                  <template #icon><X :size="16" /></template>
+                </NButton>
+              </div>
             </div>
-          </div>
+          </details>
         </section>
         <section
           class="processing-section"
@@ -279,7 +278,7 @@ function setOffset(path: string, value: number | null) {
               v-model:value="request.verticalDatum"
               :options="[
                 { label: '尚未确认', value: 'unknown' },
-                { label: '已确认是米制 WGS84 椭球高', value: 'ellipsoid' },
+                { label: '米制 WGS84 椭球高（默认）', value: 'ellipsoid' },
               ]"
               aria-label="DEM 高程基准"
             />
@@ -344,31 +343,37 @@ function setOffset(path: string, value: number | null) {
           <label for="output-path">
             {{ request.outputFormat === 'package' ? '成果文件路径' : '输出目录' }}
           </label>
-          <div class="path-input">
-            <NInput
-              v-model:value="request.output"
-              :placeholder="
-                request.outputFormat === 'package'
-                  ? request.kind === 'imagery'
-                    ? '例如 /数据/影像.mbtiles'
-                    : '例如 /数据/地形.terrain.sqlite'
-                  : '选择一个空目录'
-              "
-              :input-props="{
-                id: 'output-path',
-                'aria-describedby': 'output-help',
-                required: true,
-              }"
-            />
-            <NButton
-              class="ghost"
-              attr-type="button"
-              @click="action(() => choose('output'))"
-            >
-              <FolderOpen :size="16" />
-              选择
-            </NButton>
-          </div>
+          <NInput
+            v-model:value="request.output"
+            class="output-path-picker"
+            :placeholder="
+              request.outputFormat === 'package'
+                ? request.kind === 'imagery'
+                  ? '例如 /数据/影像.mbtiles'
+                  : '例如 /数据/地形.terrain.sqlite'
+                : '选择一个空目录'
+            "
+            :input-props="{
+              id: 'output-path',
+              'aria-describedby': 'output-help',
+              required: true,
+            }"
+          >
+            <template #suffix>
+              <NButton
+                quaternary
+                attr-type="button"
+                class="output-path-picker-button"
+                :aria-label="
+                  request.outputFormat === 'package' ? '选择成果文件路径' : '选择输出目录'
+                "
+                title="选择保存位置"
+                @click="action(() => choose('output'))"
+              >
+                <template #icon><FolderOpen :size="18" /></template>
+              </NButton>
+            </template>
+          </NInput>
           <small
             id="output-help"
             class="field-help"

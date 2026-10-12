@@ -1,6 +1,15 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { DesktopAPI } from '../shared/contracts'
 const api: DesktopAPI = {
+  lanCreateUser: (name) => ipcRenderer.invoke('gis:lanCreateUser', name),
+  lanSwitchUser: (id) => ipcRenderer.invoke('gis:lanSwitchUser', id),
+  lanSnapshot: () => ipcRenderer.invoke('gis:lanSnapshot'),
+  lanText: (id, text) => ipcRenderer.invoke('gis:lanText', id, text),
+  lanOffer: (id, paths) => ipcRenderer.invoke('gis:lanOffer', id, paths),
+  lanAccept: (id, directory) => ipcRenderer.invoke('gis:lanAccept', id, directory),
+  lanCancel: (id) => ipcRenderer.invoke('gis:lanCancel', id),
+  lanChoose: (folder) => ipcRenderer.invoke('gis:lanChoose', folder),
+  lanPreview: (id) => ipcRenderer.invoke('gis:lanPreview', id),
   resources: () => ipcRenderer.invoke('gis:resources'),
   searchBoundaries: (q) => ipcRenderer.invoke('gis:searchBoundaries', q),
   downloadResource: (r) => ipcRenderer.invoke('gis:downloadResource', r),
@@ -20,6 +29,7 @@ const api: DesktopAPI = {
   saveSettings: (value) => ipcRenderer.invoke('gis:saveSettings', value),
   server: (action) => ipcRenderer.invoke('gis:server', action),
   submit: (value) => ipcRenderer.invoke('gis:submit', value),
+  removeJobs: (ids) => ipcRenderer.invoke('gis:removeJobs', ids),
   cancel: (id) => ipcRenderer.invoke('gis:cancel', id),
   reveal: (path) => ipcRenderer.invoke('gis:reveal', path),
   copy: (text) => ipcRenderer.invoke('gis:copy', text),

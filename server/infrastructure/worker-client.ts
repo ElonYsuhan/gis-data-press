@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { existsSync } from 'node:fs'
 import { spawn, type ChildProcess } from 'node:child_process'
 export type WorkerEvent =
   | { event: 'result'; value: unknown }
@@ -42,12 +43,23 @@ export function executeWorker<T>(
 ): Promise<T> {
   const bundled = path.basename(python).startsWith('gis-worker')
   const script = path.join(resources, 'python', 'worker.py')
+  const engineRoot = bundled
+    ? path.resolve(path.dirname(python), '../..')
+    : path.join(resources, 'engines')
+  const nativeEnvironment = existsSync(path.join(engineRoot, 'share', 'proj'))
+    ? {
+        GDAL_DATA: path.join(engineRoot, 'share', 'gdal'),
+        PROJ_DATA: path.join(engineRoot, 'share', 'proj'),
+        PROJ_LIB: path.join(engineRoot, 'share', 'proj'),
+        OSG_LIBRARY_PATH: path.join(engineRoot, 'osgPlugins-3.6.5'),
+      }
+    : {}
   return new Promise((resolve, reject) => {
     const child = spawn(python, bundled ? [] : [script], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
       detached: process.platform !== 'win32',
-      env: { ...process.env, PYTHONUNBUFFERED: '1' },
+      env: { ...process.env, ...nativeEnvironment, PYTHONUNBUFFERED: '1' },
     })
     onChild?.(child)
     let buffer = ''

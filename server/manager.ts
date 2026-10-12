@@ -144,7 +144,12 @@ export class Manager {
       [
         'gdal',
         'GDAL 影像切片',
-        [path.join(bundle, 'gdal2tiles' + ext), 'gdal2tiles', 'gdal2tiles.py'],
+        [
+          path.join(bundle, 'gdal' + ext),
+          path.join(bundle, 'gdal2tiles' + ext),
+          'gdal2tiles',
+          'gdal2tiles.py',
+        ],
       ],
       ['terrain', 'CTB Quantized Mesh', [path.join(bundle, 'ctb-tile' + ext), 'ctb-tile' + ext]],
       [
@@ -156,7 +161,10 @@ export class Manager {
     this.dockerPath = await findExecutable('', ['docker', '/usr/local/bin/docker'])
     this.engines = await Promise.all(
       definitions.map(async ([id, label, candidates]) => {
-        let resolved = await findExecutable(this.settings[id], Array.from(candidates))
+        let resolved = this.settings[id] ? await findExecutable(this.settings[id]) : ''
+        if (!resolved) {
+          resolved = await findExecutable('', Array.from(candidates))
+        }
         if (
           id === 'terrain' &&
           !resolved &&
@@ -571,6 +579,25 @@ export class Manager {
         void this.pump()
       }
     }
+  }
+  async removeJobs(ids: string[]): Promise<void> {
+    if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string')) {
+      throw new Error('任务记录参数无效')
+    }
+    await this.locked(async () => {
+      const selected = new Set(ids)
+      if (
+        this.jobs.some(
+          (job) =>
+            selected.has(job.id) &&
+            (['queued', 'running'].includes(job.status) || this.runningJobs.has(job.id)),
+        )
+      ) {
+        throw new Error('运行或排队中的任务不能删除，请先取消并等待任务结束')
+      }
+      this.jobs = this.jobs.filter((job) => !selected.has(job.id))
+      await this.persist()
+    })
   }
   async cancel(id: string): Promise<void> {
     const job = this.jobs.find((j) => j.id === id)

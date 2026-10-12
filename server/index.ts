@@ -51,7 +51,7 @@ async function main() {
   const token = randomBytes(32).toString('hex')
   let mutations = 0
   const methods: Record<string, (...args: any[]) => unknown> = {
-    ping: () => ({ pid: process.pid, protocol: 5 }),
+    ping: () => ({ pid: process.pid, protocol: 7 }),
     listResources: () => manager!.listResources(),
     searchBoundaries: (...a: any[]) => manager!.searchBoundaries(a[0]),
     downloadResource: (...a: any[]) => manager!.downloadResource(a[0]),
@@ -68,6 +68,7 @@ async function main() {
     saveSettings: (s) => manager!.saveSettings(s),
     server: (a) => manager!.server(a),
     submit: (r) => manager!.submit(r),
+    removeJobs: (ids) => manager!.removeJobs(ids),
     cancel: (id) => manager!.cancel(id),
     shutdown: () => {
       setTimeout(() => void shutdown(true), 30)

@@ -11,10 +11,12 @@ import {
   X,
   HardDrive,
   Clock,
+  MessagesSquare,
 } from 'lucide-vue-next'
 import { desktop } from './services/api'
 import Resources from './features/resources/Resources.vue'
 import Jobs from './features/jobs/Jobs.vue'
+import LanChatPage from './features/chat/LanChatPage.vue'
 import ServicesPage from './pages/ServicesPage.vue'
 import ProcessingPage from './pages/ProcessingPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
@@ -132,6 +134,14 @@ onBeforeUnmount(() => clearTimeout(noticeTimer))
           </span>
         </NButton>
         <NButton
+          attr-type="button"
+          :class="{ active: tab === 'chat' }"
+          @click="tab = 'chat'"
+        >
+          <MessagesSquare :size="18" />
+          局域网聊天
+        </NButton>
+        <NButton
           quaternary
           :bordered="false"
           :class="{ active: tab === 'settings' }"
@@ -156,6 +166,8 @@ onBeforeUnmount(() => clearTimeout(noticeTimer))
         'process-workspace': tab === 'process',
         'services-workspace': tab === 'services',
         'resources-workspace': tab === 'resources',
+        'jobs-workspace': tab === 'jobs',
+        'chat-workspace': tab === 'chat',
       }"
     >
       <div class="content">
@@ -172,6 +184,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer))
           @create="tab = 'process'"
           @settings="tab = 'settings'"
           @cancel="(id) => action(() => api.cancel(id))"
+          @remove="(ids) => action(() => api.removeJobs(ids))"
           @reveal="(path) => action(() => api.reveal(path))"
           @publish="publishJob"
           @retry="
@@ -184,6 +197,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer))
           "
         />
 
+        <LanChatPage v-if="tab === 'chat'" />
         <SettingsPage v-if="tab === 'settings'" />
       </div>
       <footer

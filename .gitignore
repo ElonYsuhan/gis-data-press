@@ -20,3 +20,13 @@ data/
 .env.*
 !.env.example
 *.log
+
+# Bundled native engines are generated release artifacts
+resources/engines/lib/
+resources/engines/share/
+resources/engines/osgPlugins-*/
+resources/engines/ctb-tile
+resources/engines/3dtile
+resources/engines/gdal
+resources/engines/gdalwarp
+resources/engines/licenses/

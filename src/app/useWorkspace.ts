@@ -16,7 +16,7 @@ import type { DialogHandle } from '../components/dialog'
 
 export function useWorkspace() {
   const api = managementAPI
-  const tab = ref<'services' | 'process' | 'jobs' | 'settings' | 'resources'>('services')
+  const tab = ref<'services' | 'process' | 'jobs' | 'settings' | 'resources' | 'chat'>('services')
   const snapshot = ref<Snapshot>()
   const search = ref('')
   const selected = ref('')
@@ -55,7 +55,7 @@ export function useWorkspace() {
     workers: 2,
     sourceCrs: '',
     scale: false,
-    verticalDatum: 'unknown',
+    verticalDatum: 'ellipsoid',
   })
   const kinds = ['imagery', 'terrain', 'tileset', 'model', 'image'] as ServiceKind[]
   const kindOptions = kinds.map((kind) => ({ label: kindLabels[kind], value: kind }))

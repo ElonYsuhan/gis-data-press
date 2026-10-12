@@ -455,3 +455,68 @@
 .resource-destination .resource-download-footer {
   margin-top: 6px;
 }
+
+.boundary-map {
+  flex: 1;
+  min-height: 260px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e0e7f0;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.boundary-map-canvas {
+  position: absolute;
+  inset: 0;
+}
+.boundary-map-toolbar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #fffffff2;
+}
+.boundary-map-toolbar span {
+  flex: 1;
+  font-size: 13px;
+}
+.boundary-map-caption {
+  position: absolute;
+  bottom: 30px;
+  left: 10px;
+  padding: 6px 10px;
+  background: #fffffff2;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.acquisition-panel .boundary-search-matches {
+  flex: 0 0 auto;
+  max-height: 150px;
+  min-height: 0;
+}
+
+.boundary-map-toolbar {
+  left: 10px;
+  right: auto;
+  pointer-events: none;
+}
+.boundary-map-hover {
+  position: absolute;
+  pointer-events: none;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #e0e7f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px #20334d20;
+  font-size: 13px;
+  max-width: 160px;
+}
+.boundary-map-hover small {
+  display: block;
+  color: #758396;
+}

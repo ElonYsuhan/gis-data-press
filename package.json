@@ -77,7 +77,10 @@
         "dmg"
       ],
       "category": "public.app-category.developer-tools",
-      "icon": "resources/icons/app.icns"
+      "icon": "resources/icons/app.icns",
+      "extendInfo": {
+        "NSLocalNetworkUsageDescription": "用于发现同一局域网内的 GeoPress 用户并直接传输消息、图片和文件。"
+      }
     },
     "win": {
       "target": [

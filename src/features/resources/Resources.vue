@@ -4,6 +4,7 @@ import { NButton, NInput, NCheckbox, NPagination } from 'naive-ui'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Download, Search, FolderOpen, Plus, X, RefreshCw } from 'lucide-vue-next'
 import { api as managementAPI } from '../../services/api'
+import BoundaryMap from './BoundaryMap.vue'
 const api = managementAPI
 import type { AssetKind, LocalAsset, BoundaryResult } from '../../../shared/contracts'
 const types: { kind: AssetKind; name: string }[] = [
@@ -235,8 +236,13 @@ onBeforeUnmount(() => clearInterval(interval))
           <p class="field-help">
             支持国家、省、市、区县；同名地区通过上级区划区分。乡镇、村界暂无数据。
           </p>
+          <BoundaryMap
+            :selected="selected"
+            @select="selectBoundary"
+          />
           <div
-            class="boundary-results"
+            v-if="searched || searching"
+            class="boundary-results boundary-search-matches"
             aria-label="地名检索结果"
             :aria-busy="searching"
           >

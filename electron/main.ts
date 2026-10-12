@@ -1,14 +1,18 @@
 import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeImage, shell, Menu } from 'electron'
 import path from 'node:path'
 import { stat } from 'node:fs/promises'
+import { LanUsers } from '../server/lan-users'
 import { startBrowserUI } from './browser'
 import type { Manager } from '../server/manager'
 import { connectService } from './service-client'
 
-process.env.PATH = [process.env.PATH, '/opt/homebrew/bin', '/usr/local/bin']
-  .filter(Boolean)
-  .join(path.delimiter)
+if (!app.isPackaged) {
+  process.env.PATH = [process.env.PATH, '/opt/homebrew/bin', '/usr/local/bin']
+    .filter(Boolean)
+    .join(path.delimiter)
+}
 let browserUI: Awaited<ReturnType<typeof startBrowserUI>> | undefined
+let lan: LanUsers | undefined
 let manager: Manager
 let window: BrowserWindow
 let quitting = false
@@ -34,6 +38,13 @@ if (!app.requestSingleInstanceLock()) {
         project,
         resources,
       )
+      lan = new LanUsers(
+        path.join(
+          process.env.GEOPRESS_STATE ?? process.env.GIS_PRESS_STATE ?? app.getPath('userData'),
+          'lan-chat',
+        ),
+      )
+      await lan.start().catch((error) => console.error('LAN chat:', error))
       window = new BrowserWindow({
         width: 1440,
         height: 940,
@@ -53,6 +64,32 @@ if (!app.requestSingleInstanceLock()) {
         },
       })
       const methods: Record<string, (...args: any[]) => any> = {
+        lanSnapshot: () => lan!.snapshot(),
+        lanCreateUser: (name) => lan!.create(name),
+        lanSwitchUser: (id) => lan!.switch(id),
+        lanText: (id, text) => lan!.current.sendText(id, text),
+        lanOffer: (id, paths) => lan!.current.offer(id, paths),
+        lanAccept: (id, directory) => lan!.current.accept(id, directory),
+        lanCancel: (id) => lan!.current.cancel(id),
+        lanPreview: async (id) => {
+          const source = lan!.current.previewPath(id)
+          if (!source || (await stat(source)).size > 12 * 1024 * 1024) {
+            return null
+          }
+          const image = nativeImage.createFromPath(source)
+          return image.isEmpty()
+            ? null
+            : image.resize({ width: Math.min(360, image.getSize().width) }).toDataURL()
+        },
+        lanChoose: async (folder) => {
+          const result = await dialog.showOpenDialog(window, {
+            title: folder ? '发送文件夹' : '发送图片或文件',
+            properties: folder
+              ? ['openDirectory', 'multiSelections']
+              : ['openFile', 'multiSelections'],
+          })
+          return result.canceled ? [] : result.filePaths
+        },
         resources: () => manager.listResources(),
         searchBoundaries: (...a: any[]) => manager.searchBoundaries(a[0]),
         downloadResource: (...a: any[]) => manager.downloadResource(a[0]),
@@ -68,6 +105,7 @@ if (!app.requestSingleInstanceLock()) {
         saveSettings: (s) => manager.saveSettings(s),
         server: (a) => manager.server(a),
         submit: (r) => manager.submit(r),
+        removeJobs: (ids) => manager.removeJobs(ids),
         cancel: (id) => manager.cancel(id),
         choose: async (mode: string) => {
           if (!['file', 'directory', 'executable'].includes(mode)) {
@@ -199,6 +237,8 @@ if (!app.requestSingleInstanceLock()) {
     }
     event.preventDefault()
     quitting = true
-    void Promise.allSettled([browserUI?.close(), manager?.close()]).then(() => app.quit())
+    void Promise.allSettled([lan?.close(), browserUI?.close(), manager?.close()]).then(() =>
+      app.quit(),
+    )
   })
 }

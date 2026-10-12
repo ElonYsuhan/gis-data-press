@@ -31,9 +31,13 @@ def imagery_input(source, destination, request):
 
 
 def tile_imagery(engine, source, stage, request):
-    candidate = Path(engine).with_name('gdal.exe' if os.name == 'nt' else 'gdal')
+    candidate = (
+        Path(engine)
+        if Path(engine).stem == 'gdal'
+        else Path(engine).with_name('gdal.exe' if os.name == 'nt' else 'gdal')
+    )
     native = None
-    if Path(engine).name.startswith('gdal2tiles') and candidate.is_file():
+    if candidate.is_file():
         try:
             help_result = subprocess.run(
                 [str(candidate), 'raster', 'tile', '--help'],

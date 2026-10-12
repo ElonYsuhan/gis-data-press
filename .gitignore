@@ -30,3 +30,5 @@ resources/engines/3dtile
 resources/engines/gdal
 resources/engines/gdalwarp
 resources/engines/licenses/
+resources/engines/*.exe
+resources/engines/*.dll

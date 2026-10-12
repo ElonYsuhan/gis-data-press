@@ -1,0 +1,98 @@
+name: Windows x64 standalone package
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/windows-x64-package']
+    paths:
+      - '.github/workflows/windows-package.yml'
+      - 'scripts/**'
+      - 'server/**'
+      - 'python/**'
+      - 'electron/**'
+      - 'package*.json'
+permissions:
+  contents: read
+concurrency:
+  group: windows-package-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 120
+    env:
+      VCPKG_BINARY_SOURCES: clear;files,C:\vcpkg-cache,readwrite
+      VCPKG_MAX_CONCURRENCY: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+      - name: Enable x64 MSVC tools
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Checkout pinned native dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: e456309491fd875487bf02b8a0dca76c1b1b00cc
+          path: .test-artifacts/vcpkg
+      - uses: actions/cache@v4
+        with:
+          path: C:\vcpkg-cache
+          key: windows-x64-native-e456309-gdal-png-jpeg-osg-v1
+      - name: Bootstrap vcpkg and install development dependencies
+        shell: pwsh
+        run: |
+          & .test-artifacts/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+          if ($LASTEXITCODE -ne 0) { throw 'vcpkg bootstrap failed' }
+          rustup target add x86_64-pc-windows-msvc
+          python -m venv .venv
+          .venv/Scripts/python -m pip install -r python/requirements-dev.txt pyinstaller pefile
+          "$PWD/.venv/Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          npm ci
+      - name: Compile and bundle native tools, Python and Nginx
+        shell: pwsh
+        run: |
+          $env:PATH = "$PWD/.venv/Scripts;$env:PATH"
+          ./scripts/windows/prepare.ps1 -VcpkgRoot "$PWD/.test-artifacts/vcpkg"
+      - name: Build frontend and desktop backend
+        run: npm run build
+      - name: Build unpacked Windows x64 app
+        run: npx electron-builder --win --x64 --dir
+      - name: Verify relocated app with clean runtime environment
+        shell: pwsh
+        run: |
+          node scripts/check-standalone-win.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Standalone acceptance test failed' }
+      - name: Build installer and portable executable
+        run: npx electron-builder --win nsis portable --x64
+      - name: Make portable ZIP and checksum
+        shell: pwsh
+        run: |
+          Compress-Archive -Path release/win-unpacked -DestinationPath release/GeoPress-windows-x64-standalone.zip -CompressionLevel Optimal
+          Get-FileHash release/*.exe,release/*standalone.zip -Algorithm SHA256 | Format-Table -AutoSize | Out-File release/SHA256SUMS.txt
+      - name: Upload validated distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: GeoPress-windows-x64
+          path: |
+            release/*.exe
+            release/*standalone.zip
+            release/SHA256SUMS.txt
+          retention-days: 14
+          if-no-files-found: error
+      - name: Preserve failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-diagnostics
+          path: |
+            .test-artifacts/vcpkg/buildtrees/**/*.log
+            .test-artifacts/windows-native/**/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

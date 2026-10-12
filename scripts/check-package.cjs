@@ -26,6 +26,11 @@ module.exports = async (context) => {
       throw new Error(`安装包缺少引擎: ${file}`)
     }
   }
+  if (platform === 'win32') {
+    require('node:child_process').execFileSync('python', ['scripts/check-native-win.py', root], {
+      stdio: 'inherit',
+    })
+  }
   if (platform === 'darwin') {
     require('node:child_process').execFileSync(
       '/usr/bin/python3',

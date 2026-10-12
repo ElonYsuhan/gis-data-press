@@ -12,9 +12,11 @@ const state = path.join(root, 'state')
 const input = path.join(root, 'input.tif')
 const dem = path.join(root, 'dem.tif')
 // Fixture preparation is a development step; processing below uses only the shipped application.
-execFileSync(path.resolve('.venv/bin/python'), [
-  '-c',
-  `
+execFileSync(
+  path.resolve(process.platform === 'win32' ? '.venv/Scripts/python.exe' : '.venv/bin/python'),
+  [
+    '-c',
+    `
 import sys,numpy as np,rasterio
 from rasterio.transform import from_origin
 for i,p in enumerate(sys.argv[1:]):
@@ -23,21 +25,38 @@ for i,p in enumerate(sys.argv[1:]):
   if i==0:
    ds.colorinterp=(rasterio.enums.ColorInterp.red,rasterio.enums.ColorInterp.green,rasterio.enums.ColorInterp.blue,rasterio.enums.ColorInterp.alpha)
 `,
-  input,
-  dem,
-])
+    input,
+    dem,
+  ],
+)
 const model = path.join(root, 'model')
 await mkdir(path.join(model, 'Data', 'Tile_0'), { recursive: true })
 await cp('tests/fixtures/model.osgb', path.join(model, 'Data', 'Tile_0', 'Tile_0.osgb'))
 // Copy the whole app into a new path with spaces, testing relocatability as well as dependencies.
 const executable =
   process.env.GEOPRESS_TEST_EXECUTABLE ??
-  path.resolve('release/mac-arm64/GeoPress.app/Contents/MacOS/GeoPress')
-const appPath = path.resolve(executable, '../../..')
-const relocated = path.join(root, 'Copy with spaces', 'GeoPress.app')
+  path.resolve(
+    process.platform === 'win32'
+      ? 'release/win-unpacked/GeoPress.exe'
+      : 'release/mac-arm64/GeoPress.app/Contents/MacOS/GeoPress',
+  )
+const appPath =
+  process.platform === 'win32' ? path.dirname(executable) : path.resolve(executable, '../../..')
+const relocated = path.join(
+  root,
+  'Copy with spaces',
+  process.platform === 'win32' ? 'GeoPress' : 'GeoPress.app',
+)
 await cp(appPath, relocated, { recursive: true, verbatimSymlinks: true })
 console.log('Copied app to', relocated)
-const cleanEnv = { ...process.env, PATH: '/usr/bin:/bin:/usr/sbin:/sbin', GEOPRESS_STATE: state }
+const cleanEnv = {
+  ...process.env,
+  PATH:
+    process.platform === 'win32'
+      ? [process.env.SystemRoot, path.join(process.env.SystemRoot, 'System32')].join(path.delimiter)
+      : '/usr/bin:/bin:/usr/sbin:/sbin',
+  GEOPRESS_STATE: state,
+}
 for (const key of [
   'PYTHONPATH',
   'PYTHONHOME',
@@ -53,7 +72,10 @@ for (const key of [
   delete cleanEnv[key]
 }
 const app = await electron.launch({
-  executablePath: path.join(relocated, 'Contents/MacOS/GeoPress'),
+  executablePath: path.join(
+    relocated,
+    process.platform === 'win32' ? 'GeoPress.exe' : 'Contents/MacOS/GeoPress',
+  ),
   args: ['--user-data-dir=' + path.join(root, 'desktop')],
   env: cleanEnv,
 })

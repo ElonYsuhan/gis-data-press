@@ -52,6 +52,9 @@ export function executeWorker<T>(
         PROJ_DATA: path.join(engineRoot, 'share', 'proj'),
         PROJ_LIB: path.join(engineRoot, 'share', 'proj'),
         OSG_LIBRARY_PATH: path.join(engineRoot, 'osgPlugins-3.6.5'),
+        ...(process.platform === 'win32'
+          ? { PATH: engineRoot + path.delimiter + (process.env.PATH ?? '') }
+          : {}),
       }
     : {}
   return new Promise((resolve, reject) => {

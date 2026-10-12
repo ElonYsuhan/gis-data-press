@@ -52,7 +52,7 @@ def main():
         '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
         '-DCMAKE_TOOLCHAIN_FILE=' + str(vcpkg / 'scripts/buildsystems/vcpkg.cmake'),
         '-DVCPKG_TARGET_TRIPLET=x64-windows',
-        '-DCMAKE_CXX_FLAGS=/D_USE_MATH_DEFINES /DNOMINMAX',
+        '-DCMAKE_CXX_FLAGS=/D_USE_MATH_DEFINES /DNOMINMAX /DCTB_DLL=',
         '-DCMAKE_INSTALL_PREFIX=' + str(work / 'ctb-install'),
     )
     run('cmake', '--build', work / 'ctb-build', '--config', 'Release', '--parallel', '4')
